@@ -1,6 +1,6 @@
 import 'package:ezgym/screens/favorites.dart';
 import 'package:ezgym/screens/home.dart';
-import 'package:ezgym/screens/profile.dart';
+import 'package:ezgym/screens/profileScreen.dart';
 import 'package:ezgym/screens/search.dart';
 import 'package:flutter/material.dart';
 

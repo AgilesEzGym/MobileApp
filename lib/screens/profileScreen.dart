@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:ezgym/services/userApi.dart';
+
+import '../models/profile.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -8,6 +11,16 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+
+  String id = '2';
+  profileModel perfil = profileModel(photo: "https://i.pinimg.com/236x/69/dd/d3/69ddd3b32534d35a0874b3a1774dcfa0.jpg");
+
+  @override
+  void initState() {
+    super.initState();
+    fetch();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,14 +49,14 @@ class _ProfileState extends State<Profile> {
                 shape: BoxShape.circle,
                 image: DecorationImage(
                   image: NetworkImage(
-                    'https://cdn.pixabay.com/photo/2018/06/09/13/06/girl-3464356_1280.jpg'
+                    perfil.photo.toString()
                   ))
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Row(children: [
               Container(
-              child: Text('INFORMACIÓN PERSONAL',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+              child: const Text('INFORMACIÓN PERSONAL',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
             ),
             ],),
             Expanded(
@@ -54,14 +67,14 @@ class _ProfileState extends State<Profile> {
                     mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 10),
-                        Text('Nombre:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                        SizedBox(height: 5),
-                        Text('María Elena',style: TextStyle(fontSize: 16)),
-                        SizedBox(height: 10),
-                        Text('Correo electrónico:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                        SizedBox(height: 5),
-                        Text('maria.arias@gmail.com',style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 10),
+                        const Text('Nombre:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        const SizedBox(height: 5),
+                        Text("${perfil.name}",style: const TextStyle(fontSize: 16)),
+                        const SizedBox(height: 10),
+                        const Text("Correo electrónico:",style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        const SizedBox(height: 5),
+                        Text("${perfil.email}",style: const TextStyle(fontSize: 16)),
                       ],
                     ),
                   ),
@@ -70,14 +83,14 @@ class _ProfileState extends State<Profile> {
                     mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 10),
-                        Text('Apellido:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                        SizedBox(height: 5),
-                        Text('Arias Gonzales',style: TextStyle(fontSize: 16)),
-                        SizedBox(height: 10),
-                        Text('Número telefónico:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                        SizedBox(height: 5),
-                        Text('+51 987 654 321',style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 10),
+                        const Text('Apellido:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        const SizedBox(height: 5),
+                        Text("${perfil.surname}",style: const TextStyle(fontSize: 16)),
+                        const SizedBox(height: 10),
+                        const Text('Número telefónico:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        const SizedBox(height: 5),
+                        Text("${perfil.phone}",style: const TextStyle(fontSize: 16)),
                       ],
                     ),
                   ),
@@ -87,37 +100,37 @@ class _ProfileState extends State<Profile> {
             SizedBox(height: 10),
             Row(children: [
               Container(
-              child: Text('SUSCRIPCIÓN',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+              child: const Text('SUSCRIPCIÓN',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
             ),
             ],),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               children: [
-                Text('Tipo: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                Text('Mensual',style: TextStyle(fontSize: 16)),
+                const Text('Tipo: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                Text("${perfil.subscription?.type}",style: TextStyle(fontSize: 16)),
               ],
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Row(
               children: [
-                Text('Inicio: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                Text('09/10/2023',style: TextStyle(fontSize: 16)),
+                const Text('Inicio: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                Text("${perfil.subscription?.start}",style: TextStyle(fontSize: 16)),
               ],
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Row(
               children: [
-                Text('Fin: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                Text('09/11/2023',style: TextStyle(fontSize: 16)),
+                const Text('Fin: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                Text("${perfil.subscription?.end}",style: TextStyle(fontSize: 16)),
               ],
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             Row(children: [
               Container(
-              child: Text('MÉTODO DE PAGO',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+              child: const Text('MÉTODO DE PAGO',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
             ),
             ],),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
              Container(
               height: 50,
               decoration: BoxDecoration(
@@ -125,21 +138,21 @@ class _ProfileState extends State<Profile> {
               shape: BoxShape.rectangle,),
               child: Row(
                 children: [
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Container(
                     height: 30,
                     width: 50,
                     decoration: BoxDecoration(
                     border: Border.all(width: 1, color: Colors.grey),
                     shape: BoxShape.rectangle,
-                    image: DecorationImage(
+                    image: const DecorationImage(
                       image: NetworkImage(
                         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png'
                     ))
                   ),
                  ),
-                 SizedBox(width: 10),
-                 Text('···· ···· ···· 1234',style: TextStyle(fontSize: 16)),
+                 const SizedBox(width: 10),
+                 const Text('···· ···· ···· 1234',style: TextStyle(fontSize: 16)),
                ]),
             ),
           ],
@@ -147,4 +160,13 @@ class _ProfileState extends State<Profile> {
       ),
     );
   }
+
+  Future<void> fetch() async{
+    final response = await UserApi.fetchProfile(id);
+    setState(() {
+      perfil = response;
+    });
+    print(perfil.name);
+  }
+
 }
