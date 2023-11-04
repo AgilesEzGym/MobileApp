@@ -22,56 +22,94 @@ class _RoutineDetailsState extends State<RoutineDetails> {
         iconTheme: const IconThemeData(color: Colors.black),
         actions: <Widget>[
           IconButton(onPressed: (){
-            print("aqui");
+            print("fav");
             
           }, icon: const Icon(
             CupertinoIcons.heart_solid,
             color: Colors.black,
-          ))
+          )),
+          IconButton(onPressed: (){
+            print("rate");
+          }, icon: const Icon(Icons.star_border))
         ],
 
       ),
-      body: Container(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24.0, 24.0,24.0,0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget> [
-                Container(child: Text("${widget.rutina.description}")),
-                Container(child: Text("Duracion: ${widget.rutina.lenght} minutos"),
-                padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),),
-                Container(child: Text("Tipo: ${widget.rutina.type}"),
-                  padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),),
-                Container(child: Text("Dificultad: ${widget.rutina.difficulty}"),
-                  padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),),
-                Container(child: Text("Ejercicios: ${widget.rutina.exercise?.length}"),
-                  padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),),
-                if(widget.rutina.equipment == true)
-                Container(child: Text("Accesorios: Si"),
-                  padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),),
-                if(widget.rutina.equipment == false)
-                Container(child: Text("Accesorios: No"),
-                    padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),),
-                Container(child: Row(
-                  children: [
-                    Text("Calificaión: ${widget.rutina.score}"),
-                    Icon(Icons.star, color: Colors.amber, size: 18)
-                  ],
-                ),
-                  padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),),
-                ListView.builder(scrollDirection: Axis.vertical,
-                    itemCount: widget.rutina.exercise?.length,
-                    shrinkWrap: true,
-                    itemBuilder: (context, index){
-                    final Exercise? exercise = widget.rutina.exercise?[index];
-                    return ListTile(
-                      title: Text(" ${exercise?.name}"),
-                    );
-                    })
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24.0, 24.0,24.0,0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget> [
+              Container(child: Text("${widget.rutina.description}")),
+              Container(padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+                child: Text("Duracion: ${widget.rutina.lenght} minutos"),),
+              Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
+                child: Text("Tipo: ${widget.rutina.type}"),),
+              Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
+                child: Text("Dificultad: ${widget.rutina.difficulty}"),),
+              Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
+                child: Text("Ejercicios: ${widget.rutina.exercise?.length}"),),
+              if(widget.rutina.equipment == true)
+              Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
+                child: const Text("Accesorios: Si"),),
+              if(widget.rutina.equipment == false)
+              Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
+                child: const Text("Accesorios: No"),),
+              Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 24),child: Row(
+                children: [
+                  Text("Calificaión: ${widget.rutina.score}"),
+                  const Icon(Icons.star, color: Colors.amber, size: 18)
+                ],
+              ),),
+              ListView.builder(scrollDirection: Axis.vertical,
+                  itemCount: widget.rutina.exercise?.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index){
+                  final Exercise? exercise = widget.rutina.exercise?[index];
+                  return SingleChildScrollView(
+                    child: Card(
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Column(
+                                children:< Widget> [
+                                Image.network(exercise!.image.toString(), width: 100,)
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(16,0,0,0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("${exercise?.name}", style: const TextStyle(fontWeight: FontWeight.bold),),
+                                    Text("Repeticiones: ${exercise.reps}")
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(16,0,0,0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    IconButton(onPressed: (){
+                                      print("estimacion");
+                                    }, icon: const Icon(Icons.remove_red_eye_outlined)),
+                                    IconButton(onPressed: (){
+                                      print("video");
+                                    }, icon: const Icon(Icons.slow_motion_video_sharp))
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                  })
 
-              ],
-            ),
+            ],
           ),
         ),
       ),
