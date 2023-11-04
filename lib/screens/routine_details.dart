@@ -1,5 +1,6 @@
 import 'package:ezgym/models/routine.dart';
 import 'package:ezgym/models/exercise.dart';
+import 'package:ezgym/services/routineApi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -30,6 +31,7 @@ class _RoutineDetailsState extends State<RoutineDetails> {
           )),
           IconButton(onPressed: (){
             print("rate");
+            showMessage();
           }, icon: const Icon(Icons.star_border))
         ],
 
@@ -115,4 +117,60 @@ class _RoutineDetailsState extends State<RoutineDetails> {
       ),
     );
   }
+
+  void showMessage(){
+        int rating = 0;
+        Routine data = widget.rutina;
+        showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Rate'),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(
+                width: 75,
+                child: TextField(
+                    decoration: const InputDecoration(
+                        //hintText: "Inserte su busqueda",
+                        labelText: "Rating",
+                        //border: OutlineInputBorder(
+                        //    borderRadius: BorderRadius.all(Radius.circular(20.0))
+                        //)
+                    )
+                    ,
+                    onChanged: (value){
+                      rating = int.parse(value);
+                      print(rating);
+                    },
+                  keyboardType: TextInputType.number,
+
+                ),
+              ),
+              Icon(Icons.star,color: Colors.amber)
+              ],
+
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, 'Cancel');
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                data.score= rating;
+                updateRating(data);
+                Navigator.pop(context, 'OK');
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+    Future<void> updateRating(dynamic data) async{
+      await RoutineApi.updateRoutine(data);
+    }
 }

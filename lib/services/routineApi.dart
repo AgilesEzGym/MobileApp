@@ -35,5 +35,15 @@ class RoutineApi{
     return transformed;
 
   }
+  
+  static Future<void> updateRoutine(Routine data)async{
+    final headers = {"Content-type": "application/json"};
+    var url = 'http://10.0.2.2:3000/routines/${data.id}';
+    final uri = Uri.parse(url);
+    final json = data.toJson();
+    print(json);
+    final response = await http.put(uri, headers: headers , body: jsonEncode(json));
+    print(response.statusCode);
+  }
 
 }
