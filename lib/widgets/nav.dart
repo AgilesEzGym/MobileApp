@@ -17,17 +17,17 @@ class _NavState extends State<Nav> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index){
+          onDestinationSelected: (int index){
           setState(() {
             currentPageIndex = index;
           });
         },
         selectedIndex: currentPageIndex,
         destinations: const<Widget>[
-          NavigationDestination(icon: Icon(Icons.home), label: 'home'),
-          NavigationDestination(icon: Icon(Icons.search), label: 'search'),
-          NavigationDestination(icon: Icon(Icons.favorite), label: 'favorites'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'profile')
+          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
+          NavigationDestination(icon: Icon(Icons.favorite), label: 'Favorites'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile')
         ],
       ),
       body: <Widget>[

@@ -1,3 +1,4 @@
+import 'package:ezgym/screens/routine_details.dart';
 import 'package:flutter/material.dart';
 
 import '../models/routine.dart';
@@ -23,7 +24,7 @@ class _FavsState extends State<Favs> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 160.0,
+        height: 175.0,
         margin: const EdgeInsets.symmetric(vertical: 20),
         child: ListView.builder(scrollDirection: Axis.horizontal,
           shrinkWrap: true,
@@ -32,15 +33,21 @@ class _FavsState extends State<Favs> {
             final rutina = rutinas[index];
             return InkWell(
               onTap: (){
-                print("aqui");
+                Navigator.push(context, MaterialPageRoute(builder: (context) => RoutineDetails(rutina: rutina)));
               },
               child: Card(
 
                 child: Column(
                   children: [
-
                     Image.network(rutina.image.toString(), width: 175),
-                    Text("Duracion: ")
+                    Text("${rutina.name}"),
+                    Text("Duracion: ${rutina.lenght} min"),
+                    Row(
+                      children: [
+                        Text("${rutina.score}"),
+                        Icon(Icons.star, color: Colors.amber,size: 15,),
+                      ],
+                    )
                   ],
                 ),
               ),

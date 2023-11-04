@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/routine.dart';
+import '../screens/routine_details.dart';
 import '../services/routineApi.dart';
 
 class Latest extends StatefulWidget {
@@ -22,7 +23,7 @@ class _LatestState extends State<Latest> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 160.0,
+        height: 175.0,
         margin: const EdgeInsets.symmetric(vertical: 20),
         child: ListView.builder(scrollDirection: Axis.horizontal,
           shrinkWrap: true,
@@ -31,13 +32,22 @@ class _LatestState extends State<Latest> {
             final rutina = rutinas[index];
             return InkWell(
               onTap: (){
-                print("aqui");
+                Navigator.push(context, MaterialPageRoute(builder: (context) => RoutineDetails(rutina: rutina)));
               },
               child: Card(
 
-                child: SizedBox(
-                    width: 200.0,
-                    child: Text(rutina.name.toString())
+                child: Column(
+                  children: [
+                    Image.network(rutina.image.toString(), width: 175),
+                    Text("${rutina.name}"),
+                    Text("Duracion: ${rutina.lenght} min"),
+                    Row(
+                      children: [
+                        Text("${rutina.score}"),
+                        Icon(Icons.star, color: Colors.amber,size: 15,),
+                      ],
+                    )
+                  ],
                 ),
               ),
             );

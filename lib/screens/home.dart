@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:ezgym/services/routineApi.dart';
 import 'package:ezgym/widgets/favs.dart';
 import 'package:ezgym/widgets/latest.dart';
@@ -25,34 +27,37 @@ class _HomeState extends State<Home> {
         title: const Text('EzGym', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black)
       ),
       body: Container(
         alignment: Alignment.center,
-        child: const Column(
-            children: <Widget> [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text('¡Bienvenido Usuario!', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              Row(
-              children: [
-                Text("Recomendaciones")
-              ],
-              ),
-              Recommended(),
-              Row(
+        child: SingleChildScrollView(
+          child: const Column(
+              children: <Widget> [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('¡Bienvenido Usuario!', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                Row(
                 children: [
-                  Text("Ultimos agregados")
+                  Text("Recomendaciones")
                 ],
-              ),
-              Latest(),
-              Row(
-                children: [
-                  Text("Rutinas favoritas")
-                ],
-              ),
-              Favs()
-          ],
+                ),
+                Recommended(),
+                Row(
+                  children: [
+                    Text("Ultimos agregados")
+                  ],
+                ),
+                Latest(),
+                Row(
+                  children: [
+                    Text("Rutinas favoritas")
+                  ],
+                ),
+                Favs()
+            ],
+          ),
         ),
       ),
     );
