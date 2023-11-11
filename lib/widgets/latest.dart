@@ -38,7 +38,7 @@ class _LatestState extends State<Latest> {
 
                 child: Column(
                   children: [
-                    Image.network(rutina.image.toString(), width: 175),
+                    Image.network(rutina.image.toString(), width: 175, height: 110,),
                     Text("${rutina.name}"),
                     Text("Duracion: ${rutina.lenght} min"),
                     Row(
