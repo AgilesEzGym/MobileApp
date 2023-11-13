@@ -1,4 +1,5 @@
 import 'package:ezgym/screens/home.dart';
+import 'package:ezgym/screens/login.dart';
 import 'package:ezgym/widgets/nav.dart';
 import 'package:flutter/material.dart';
 
