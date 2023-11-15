@@ -7,6 +7,65 @@ class Create extends StatefulWidget {
 
 class _CreateState extends State<Create> {
   bool isChecked = false;
+  int _currentStep = 0;
+
+  List<Step> stepList() => [
+    Step(
+        title: const Text('Datos personales'),
+        isActive: _currentStep >= 0,
+        state: _currentStep <= 0 ? StepState.editing : StepState.complete,
+        content: Column(
+          children: const [
+            TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Nombres',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Apellidos',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Correo electrónico',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Contraseña',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Confirmar contraseña',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+          ],
+        ),
+    ),
+    const Step(title: Text('Suscripción'), content: Center(child: Text('Suscripción'),)),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -18,83 +77,18 @@ class _CreateState extends State<Create> {
           iconTheme: const IconThemeData(color: Colors.black)
       ),
       backgroundColor: Colors.white,
-      body: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Form(
-                  child: Container(
-                    padding: EdgeInsets.all(25),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        TextFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Nombre',
-                          ),
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(top: 20.0)
-                        ),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Apellido',
-                          ),
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(top: 20.0)
-                        ),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Correo electrónico',
-                          ),
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(top: 20.0)
-                        ),
-                        TextFormField(
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Contraseña',
-                          ),
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(top: 20.0)
-                        ),
-                        TextFormField(
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Confirmar contraseña',
-                          ),
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(top: 20.0)
-                        ),
-                        MaterialButton(
-                          height: 45.0,
-                          minWidth: 160.0,
-                          color: Colors.indigo.shade900,
-                          textColor: Colors.white,
-                          child: Text("Continuar"),
-                          onPressed: () => {},
-                          splashColor: Colors.white,
-                        ),
-                        Padding(
-                            padding: EdgeInsets.only(top: 80.0)
-                        ),
-                      ],
-                    ),
-                  ))
-            ],
-          )
-        ],
+      body: Stepper(
+        steps: stepList(),
+        type: StepperType.horizontal,
+        elevation: 0,
+        currentStep: _currentStep,
+        onStepContinue: (){
+          if( _currentStep < (stepList().length -1) ) {
+            setState(() {
+              _currentStep += 1;
+            });
+          }
+        },
       ),
     );
   }

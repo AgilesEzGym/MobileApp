@@ -29,7 +29,6 @@ class _LoginState extends State<Login> {
               Text(
                 'EzGym',
                 style: TextStyle(
-                    fontFamily: 'cursive',
                     fontSize: 35.0
                 ),
               ),
