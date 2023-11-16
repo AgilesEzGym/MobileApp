@@ -64,7 +64,91 @@ class _CreateState extends State<Create> {
           ],
         ),
     ),
-    const Step(title: Text('Suscripción'), content: Center(child: Text('Suscripción'),)),
+    Step(
+        title: Text('Suscripción'),
+        content: Center(
+          child: SizedBox(
+            height: 250,
+            child: ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15.0)),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width*1,
+                      height: 120,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width*0.55,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Plan Mensual',style: TextStyle(fontWeight: FontWeight.bold)),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Text('Prueba gratuita de 1 semana para nuevos usuarios, '
+                                    'posterior al periodo de prueba el usuario '
+                                    'debera pagar lo correspondiente por una prueba mensual S/ 20')
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Container(
+                              child: Text(
+                                'S/. 20',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15.0)),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width*1,
+                      height: 100,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width*0.55,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Plan Anual',style: TextStyle(fontWeight: FontWeight.bold)),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Text('Ahorra dos meses de suscripcion disfruta la aplicacion por un anio entero '
+                                    'pagando por el precio de 10 meses')
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Container(
+                              child: Text(
+                                'S/. 200',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ))
+    ),
+
   ];
 
   @override
@@ -86,6 +170,13 @@ class _CreateState extends State<Create> {
           if( _currentStep < (stepList().length -1) ) {
             setState(() {
               _currentStep += 1;
+            });
+          }
+        },
+        onStepCancel: (){
+          if(_currentStep > 0){
+            setState(() {
+              _currentStep -= 1;
             });
           }
         },
