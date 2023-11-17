@@ -13,7 +13,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
 
   String id = '2';
-  profileModel perfil = profileModel(photo: "https://i.pinimg.com/236x/69/dd/d3/69ddd3b32534d35a0874b3a1774dcfa0.jpg");
+  profileModel perfil = profileModel(photo: "https://cdn-icons-png.flaticon.com/512/1361/1361728.png");
 
   @override
   void initState() {
@@ -56,7 +56,7 @@ class _ProfileState extends State<Profile> {
             const SizedBox(height: 30),
             Row(children: [
               Container(
-              child: const Text('INFORMACIÓN PERSONAL',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+              child: const Text('INFORMACIÓN PERSONAL',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
             ),
             ],),
             Expanded(
@@ -68,13 +68,13 @@ class _ProfileState extends State<Profile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 10),
-                        const Text('Nombre:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        const Text('Nombre:',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         const SizedBox(height: 5),
-                        Text("${perfil.name}",style: const TextStyle(fontSize: 16)),
+                        Text("${perfil.name}",style: const TextStyle(fontSize: 14)),
                         const SizedBox(height: 10),
-                        const Text("Correo electrónico:",style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        const Text("Correo electrónico:",style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         const SizedBox(height: 5),
-                        Text("${perfil.email}",style: const TextStyle(fontSize: 16)),
+                        Text("${perfil.email}",style: const TextStyle(fontSize: 14)),
                       ],
                     ),
                   ),
@@ -84,13 +84,13 @@ class _ProfileState extends State<Profile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 10),
-                        const Text('Apellido:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        const Text('Apellido:',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         const SizedBox(height: 5),
-                        Text("${perfil.surname}",style: const TextStyle(fontSize: 16)),
+                        Text("${perfil.surname}",style: const TextStyle(fontSize: 14)),
                         const SizedBox(height: 10),
-                        const Text('Número telefónico:',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        const Text('Número telefónico:',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         const SizedBox(height: 5),
-                        Text("${perfil.phone}",style: const TextStyle(fontSize: 16)),
+                        Text("${perfil.phone}",style: const TextStyle(fontSize: 14)),
                       ],
                     ),
                   ),
@@ -100,45 +100,45 @@ class _ProfileState extends State<Profile> {
             SizedBox(height: 10),
             Row(children: [
               Container(
-              child: const Text('SUSCRIPCIÓN',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+              child: const Text('SUSCRIPCIÓN',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
             ),
             ],),
             const SizedBox(height: 10),
             Row(
               children: [
-                const Text('Tipo: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                const Text('Tipo: ',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                 Text("${perfil.subscription?.type}",style: TextStyle(fontSize: 16)),
               ],
             ),
             const SizedBox(height: 5),
             Row(
               children: [
-                const Text('Inicio: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                const Text('Inicio: ',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                 Text("${perfil.subscription?.start}",style: TextStyle(fontSize: 16)),
               ],
             ),
             const SizedBox(height: 5),
             Row(
               children: [
-                const Text('Fin: ',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                const Text('Fin: ',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                 Text("${perfil.subscription?.end}",style: TextStyle(fontSize: 16)),
               ],
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 10),
             Row(children: [
               Container(
-              child: const Text('MÉTODO DE PAGO',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+              child: const Text('MÉTODO DE PAGO',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
             ),
             ],),
             const SizedBox(height: 10),
              Container(
-              height: 50,
+              height: 40,
               decoration: BoxDecoration(
               border: Border.all(width: 2, color: Colors.grey),
               shape: BoxShape.rectangle,),
               child: Row(
                 children: [
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 15),
                   Container(
                     height: 30,
                     width: 50,
