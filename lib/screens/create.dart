@@ -13,7 +13,7 @@ class _CreateState extends State<Create> {
     Step(
         title: const Text('Datos personales'),
         isActive: _currentStep >= 0,
-        state: _currentStep <= 0 ? StepState.editing : StepState.complete,
+        state: StepState.editing,
         content: Column(
           children: const [
             TextField(
@@ -66,6 +66,8 @@ class _CreateState extends State<Create> {
     ),
     Step(
         title: Text('Suscripción'),
+        isActive: _currentStep >= 1,
+        state: StepState.complete,
         content: Center(
           child: SizedBox(
             height: 250,

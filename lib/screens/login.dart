@@ -1,4 +1,5 @@
 import 'package:ezgym/screens/create.dart';
+import 'package:ezgym/screens/home.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -87,7 +88,7 @@ class _LoginState extends State<Login> {
                           textColor: Colors.white,
                           child: Text("Iniciar sesión"),
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=> Create()));
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=> Home()));
                           },
                           splashColor: Colors.white,
                         ),
@@ -121,7 +122,9 @@ class _LoginState extends State<Login> {
                               ),
                             ),
                             MaterialButton(
-                              onPressed: (){},
+                              onPressed: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=> Create()));
+                              },
                               child: Text(
                                 'Registrate',
                                 style: TextStyle(
