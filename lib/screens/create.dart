@@ -1,4 +1,5 @@
 import 'package:ezgym/screens/home.dart';
+import 'package:ezgym/screens/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -121,7 +122,7 @@ class _CreateState extends State<Create> {
     Step(
         title: Text('Suscripción'),
         isActive: _currentStep >= 1,
-        state: StepState.complete,
+        state: StepState.editing,
         content: Center(
           child: SizedBox(
             height: 250,
@@ -227,7 +228,7 @@ class _CreateState extends State<Create> {
     Step(
         title: const Text('Pago'),
         isActive: _currentStep >= 2,
-        state: StepState.editing,
+        state: StepState.complete,
         content: Form(
         key: _keyForm2,
         child: Column(
@@ -371,17 +372,21 @@ class _CreateState extends State<Create> {
                 _currentStep += 1;
               });
             }
-          }
-          if (_keyForm2.currentState!.validate() && _currentStep == 2){
+          } else if (_keyForm2.currentState!.validate() && _currentStep == 2){
             Navigator.push(context, MaterialPageRoute(builder: (context)=> Home()));
           }
         },
         onStepCancel: (){
-          if(_currentStep > 0){
+          if (_currentStep!= 0) {
+            if(_currentStep > 0){
             setState(() {
               _currentStep -= 1;
             });
+            }
+          } else {
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> Login()));
           }
+          
         },
       ),
     );
