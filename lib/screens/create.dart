@@ -1,3 +1,5 @@
+import 'package:ezgym/screens/home.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Create extends StatefulWidget {
@@ -8,15 +10,32 @@ class Create extends StatefulWidget {
 class _CreateState extends State<Create> {
   bool isChecked = false;
   int _currentStep = 0;
+  int numChecked = 0;
+  final _keyForm = GlobalKey<FormState>();
+  final _keyForm2 = GlobalKey<FormState>();
+  Color _colorContainer1 = Colors.transparent;
+  Color _colorContainer2 = Colors.transparent;
+  DateTime dateTime = DateTime.now();
+  TextEditingController date = TextEditingController();
 
   List<Step> stepList() => [
     Step(
         title: const Text('Datos personales'),
         isActive: _currentStep >= 0,
         state: StepState.editing,
-        content: Column(
-          children: const [
-            TextField(
+        content: Form(
+        key: _keyForm,
+        child: Column(
+          children: [
+            TextFormField(
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                }
+                return null;
+              },
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Nombres',
@@ -25,7 +44,15 @@ class _CreateState extends State<Create> {
             SizedBox(
               height: 8,
             ),
-            TextField(
+            TextFormField(
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                }
+                return null;
+              },
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Apellidos',
@@ -34,7 +61,15 @@ class _CreateState extends State<Create> {
             SizedBox(
               height: 8,
             ),
-            TextField(
+            TextFormField(
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                }
+                return null;
+              },
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Correo electrónico',
@@ -43,7 +78,16 @@ class _CreateState extends State<Create> {
             SizedBox(
               height: 8,
             ),
-            TextField(
+            TextFormField(
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                }
+                return null;
+              },
+              obscureText: true,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Contraseña',
@@ -52,7 +96,16 @@ class _CreateState extends State<Create> {
             SizedBox(
               height: 8,
             ),
-            TextField(
+            TextFormField(
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                }
+                return null;
+              },
+              obscureText: true,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Confirmar contraseña',
@@ -63,6 +116,7 @@ class _CreateState extends State<Create> {
             ),
           ],
         ),
+      ),
     ),
     Step(
         title: Text('Suscripción'),
@@ -77,9 +131,18 @@ class _CreateState extends State<Create> {
                   padding: const EdgeInsets.all(1.0),
                   child: Card(
                     shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15.0)),
+                    child: new InkWell(
+                      onTap: () { 
+                        setState(() {
+                          isChecked = true;
+                          _colorContainer1 = Colors.blue.withOpacity(0.3);
+                          _colorContainer2 = Colors.transparent;
+                        });
+                    },
                     child: Container(
                       width: MediaQuery.of(context).size.width*1,
                       height: 120,
+                      color: _colorContainer1,
                       child: Row(
                         children: [
                           Container(
@@ -108,15 +171,25 @@ class _CreateState extends State<Create> {
                         ],
                       ),
                     ),
+                    ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(1.0),
                   child: Card(
                     shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15.0)),
+                    child: new InkWell(
+                      onTap: () { 
+                        setState(() {
+                          isChecked = true;
+                          _colorContainer1 = Colors.transparent;
+                          _colorContainer2 = Colors.blue.withOpacity(0.3);
+                        });
+                    },
                     child: Container(
                       width: MediaQuery.of(context).size.width*1,
                       height: 100,
+                      color: _colorContainer2,
                       child: Row(
                         children: [
                           Container(
@@ -145,10 +218,133 @@ class _CreateState extends State<Create> {
                       ),
                     ),
                   ),
+                  ),
                 ),
               ],
             ),
           ))
+    ),
+    Step(
+        title: const Text('Pago'),
+        isActive: _currentStep >= 2,
+        state: StepState.editing,
+        content: Form(
+        key: _keyForm2,
+        child: Column(
+          children: [
+            TextFormField(
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                } else if (value.length != 16) {
+                  return 'La número tarjeta debe tener 16 dígitos';
+                }
+                return null;
+              },
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Número de tarjeta',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            TextFormField(
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Nombre del titular',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            TextFormField(
+              onTap:() {
+                FocusScope.of(context).requestFocus(new FocusNode());
+                setState(() {
+                  showCupertinoModalPopup(
+                    context: context,
+                    builder: (BuildContext context) => 
+                    Container(
+                      height: MediaQuery.of(context).size.height * 0.4,
+                      color: Colors.white,
+                      child: Column (
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              date.text = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+                            }, 
+                            child: const Text("Hecho"),
+                          ),
+                          Expanded(
+                            child: CupertinoDatePicker(
+                            backgroundColor: Colors.white,
+                            initialDateTime: dateTime,
+                            onDateTimeChanged: (DateTime newDateTime) {
+                              dateTime = newDateTime;
+                            },
+                            use24hFormat: true,
+                            mode: CupertinoDatePickerMode.date,
+                          ),
+                          )
+                        ],
+                        )         
+                      ),
+                    );
+                  }
+                );
+              },
+              controller: date,
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Fecha de vencimiento',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            TextFormField(
+              autovalidateMode:
+              AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Campo obligatorio';
+                }
+                return null;
+              },
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Código CVV',
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+          ],
+        ),
+      ),
     ),
 
   ];
@@ -169,10 +365,15 @@ class _CreateState extends State<Create> {
         elevation: 0,
         currentStep: _currentStep,
         onStepContinue: (){
-          if( _currentStep < (stepList().length -1) ) {
-            setState(() {
-              _currentStep += 1;
-            });
+          if ( (_keyForm.currentState!.validate() && _currentStep == 0) || (isChecked && _currentStep == 1)) {
+            if( _currentStep < (stepList().length -1) ) {
+              setState(() {
+                _currentStep += 1;
+              });
+            }
+          }
+          if (_keyForm2.currentState!.validate() && _currentStep == 2){
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> Home()));
           }
         },
         onStepCancel: (){
