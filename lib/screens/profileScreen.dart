@@ -1,11 +1,13 @@
 import 'package:ezgym/models/subscription.dart';
 import 'package:flutter/material.dart';
 import 'package:ezgym/services/userApi.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/profile.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({Key? key}) : super(key: key);
+  const Profile({Key? key, required this.id}) : super(key: key);
+  final String id;
 
   @override
   _ProfileState createState() => _ProfileState();
@@ -13,7 +15,8 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
 
-  String id = '655a78da3baaac2cab4500bb';
+  final storage = FlutterSecureStorage();
+  late String id = widget.id;
   profileModel perfil = profileModel(photo: "https://cdn-icons-png.flaticon.com/512/1361/1361728.png");
   List<Subscription> sub = [];
 

@@ -5,6 +5,7 @@ import 'package:ezgym/screens/create.dart';
 import 'package:ezgym/screens/home.dart';
 import 'package:ezgym/services/authApi.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../widgets/nav.dart';
 
@@ -15,6 +16,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool isChecked = false;
+  final storage = FlutterSecureStorage();
   late String _email;
   late  String _password;
   late loginModel creds;
@@ -189,7 +191,8 @@ class _LoginState extends State<Login> {
     var decoded = jsonDecode(response.body);
 
     if(response.statusCode == 200){
-      //await storage.write(key: 'id', value: decoded['user']['_id']);
+      print(decoded['id']);
+      await storage.write(key: 'id', value: decoded['id']);
       navigate();
     }
     else{
