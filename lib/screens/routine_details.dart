@@ -4,6 +4,8 @@ import 'package:ezgym/services/routineApi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../views/pose_detection_view.dart';
+
 class RoutineDetails extends StatefulWidget {
   const RoutineDetails({Key? key, required this.rutina}) : super(key: key);
   final Routine rutina;
@@ -13,6 +15,15 @@ class RoutineDetails extends StatefulWidget {
 }
 
 class _RoutineDetailsState extends State<RoutineDetails> {
+
+  List<Exercise> ejercicios = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getExercices();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +53,8 @@ class _RoutineDetailsState extends State<RoutineDetails> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget> [
-              Container(child: Text("${widget.rutina.description}")),
+              Container(child: Image.network(widget.rutina.image.toString()), width: 400,),
+              Container(child: Text("${widget.rutina.description}"),padding: EdgeInsets.only(top: 15),),
               Container(padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
                 child: Text("Duracion: ${widget.rutina.lenght} minutos"),),
               Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
@@ -50,7 +62,7 @@ class _RoutineDetailsState extends State<RoutineDetails> {
               Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
                 child: Text("Dificultad: ${widget.rutina.difficulty}"),),
               Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
-                child: Text("Ejercicios: ${widget.rutina.exercise?.length}"),),
+                child: Text("Ejercicios: ${ejercicios?.length}"),),
               if(widget.rutina.equipment == true)
               Container(padding: const EdgeInsets.fromLTRB(0, 6, 0, 0),
                 child: const Text("Accesorios: Si"),),
@@ -64,10 +76,10 @@ class _RoutineDetailsState extends State<RoutineDetails> {
                 ],
               ),),
               ListView.builder(scrollDirection: Axis.vertical,
-                  itemCount: widget.rutina.exercise?.length,
+                  itemCount: ejercicios.length,
                   shrinkWrap: true,
                   itemBuilder: (context, index){
-                  final Exercise? exercise = widget.rutina.exercise?[index];
+                  final Exercise? exercise = ejercicios[index];
                   return SingleChildScrollView(
                     child: Card(
                       child: Column(
@@ -95,6 +107,10 @@ class _RoutineDetailsState extends State<RoutineDetails> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     IconButton(onPressed: (){
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => PoseDetectorView(),)
+                                      );
                                       print("estimacion");
                                     }, icon: const Icon(Icons.remove_red_eye_outlined)),
                                     IconButton(onPressed: (){
@@ -172,5 +188,12 @@ class _RoutineDetailsState extends State<RoutineDetails> {
     }
     Future<void> updateRating(dynamic data) async{
       await RoutineApi.updateRoutine(data);
+    }
+    
+    Future<void> getExercices() async{
+      dynamic res = await RoutineApi.getExercices(widget.rutina.sId.toString());
+      setState(() {
+        ejercicios = res;
+      });
     }
 }

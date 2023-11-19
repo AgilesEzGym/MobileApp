@@ -1,8 +1,11 @@
 import 'package:ezgym/screens/favorites.dart';
 import 'package:ezgym/screens/home.dart';
+import 'package:ezgym/screens/login.dart';
+import 'package:ezgym/screens/create.dart';
 import 'package:ezgym/screens/profileScreen.dart';
 import 'package:ezgym/screens/search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Nav extends StatefulWidget {
   const Nav({Key? key}) : super(key: key);
@@ -12,7 +15,14 @@ class Nav extends StatefulWidget {
 }
 
 class _NavState extends State<Nav> {
+  final storage = FlutterSecureStorage();
+  late String id;
   int currentPageIndex = 0;
+
+  @override
+  void initState() {
+    setParams();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,8 +44,15 @@ class _NavState extends State<Nav> {
         Home(),
         Search(),
         Favourites(),
-        Profile()
+        Profile(id: id)
       ][currentPageIndex],
     );
+  }
+  void setParams() async{
+    var uid = await storage.read(key: 'id');
+    setState(() {
+      id= uid.toString();
+    });
+    print(id);
   }
 }
