@@ -4,6 +4,8 @@ import 'package:ezgym/services/routineApi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../views/pose_detection_view.dart';
+
 class RoutineDetails extends StatefulWidget {
   const RoutineDetails({Key? key, required this.rutina}) : super(key: key);
   final Routine rutina;
@@ -105,6 +107,10 @@ class _RoutineDetailsState extends State<RoutineDetails> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     IconButton(onPressed: (){
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => PoseDetectorView(),)
+                                      );
                                       print("estimacion");
                                     }, icon: const Icon(Icons.remove_red_eye_outlined)),
                                     IconButton(onPressed: (){
