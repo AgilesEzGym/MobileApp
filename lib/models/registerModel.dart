@@ -1,40 +1,36 @@
-class profileModel {
-  String? sId;
+class registerModel {
   String? name;
   String? surname;
   String? email;
-  String? password;
   String? phone;
   String? photo;
+  String? password;
 
-  profileModel(
-      {this.sId,
-        this.name,
+  registerModel(
+      {this.name,
         this.surname,
         this.email,
-        this.password,
         this.phone,
-        this.photo});
+        this.photo,
+        this.password});
 
-  profileModel.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
+  registerModel.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     surname = json['surname'];
     email = json['email'];
-    password = json['password'];
     phone = json['phone'];
     photo = json['photo'];
+    password = json['password'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
     data['name'] = this.name;
     data['surname'] = this.surname;
     data['email'] = this.email;
-    data['password'] = this.password;
     data['phone'] = this.phone;
     data['photo'] = this.photo;
+    data['password'] = this.password;
     return data;
   }
 }

@@ -56,7 +56,7 @@ class _RecommendedState extends State<Recommended> {
     );
   }
   Future<void> fetchRoutines() async{
-    final response = await RoutineApi.fetchRoutines();
+    final response = await RoutineApi.getRecommended();
     setState(() {
       rutinas = response;
     });

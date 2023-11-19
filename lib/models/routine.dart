@@ -1,7 +1,5 @@
-import 'exercise.dart';
-
 class Routine {
-  int? id;
+  String? sId;
   String? name;
   String? description;
   int? lenght;
@@ -10,10 +8,11 @@ class Routine {
   bool? equipment;
   int? score;
   String? image;
-  List<Exercise>? exercise;
+  bool? isRecommended;
+  int? iV;
 
   Routine(
-      {this.id,
+      {this.sId,
         this.name,
         this.description,
         this.lenght,
@@ -22,10 +21,11 @@ class Routine {
         this.equipment,
         this.score,
         this.image,
-        this.exercise});
+        this.isRecommended,
+        this.iV});
 
   Routine.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    sId = json['_id'];
     name = json['name'];
     description = json['description'];
     lenght = json['lenght'];
@@ -34,17 +34,13 @@ class Routine {
     equipment = json['equipment'];
     score = json['score'];
     image = json['image'];
-    if (json['exercise'] != null) {
-      exercise = <Exercise>[];
-      json['exercise'].forEach((v) {
-        exercise!.add(new Exercise.fromJson(v));
-      });
-    }
+    isRecommended = json['isRecommended'];
+    iV = json['__v'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
+    data['_id'] = this.sId;
     data['name'] = this.name;
     data['description'] = this.description;
     data['lenght'] = this.lenght;
@@ -53,9 +49,8 @@ class Routine {
     data['equipment'] = this.equipment;
     data['score'] = this.score;
     data['image'] = this.image;
-    if (this.exercise != null) {
-      data['exercise'] = this.exercise!.map((v) => v.toJson()).toList();
-    }
+    data['isRecommended'] = this.isRecommended;
+    data['__v'] = this.iV;
     return data;
   }
 }

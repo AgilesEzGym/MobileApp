@@ -29,18 +29,14 @@ class _NavState extends State<Nav> {
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
           NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
           NavigationDestination(icon: Icon(Icons.favorite), label: 'Favorites'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Login'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Create')
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile')
         ],
       ),
       body: <Widget>[
         Home(),
         Search(),
         Favourites(),
-        Profile(),
-        Login(),
-        Create()
+        Profile()
       ][currentPageIndex],
     );
   }

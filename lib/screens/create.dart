@@ -1,7 +1,13 @@
+import 'dart:convert';
+
+import 'package:ezgym/models/registerModel.dart';
 import 'package:ezgym/screens/home.dart';
 import 'package:ezgym/screens/login.dart';
+import 'package:ezgym/services/authApi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../models/subscription.dart';
 
 class Create extends StatefulWidget {
   @override
@@ -19,6 +25,12 @@ class _CreateState extends State<Create> {
   DateTime dateTime = DateTime.now();
   TextEditingController date = TextEditingController();
 
+  String nombre = "";
+  String apellido = "";
+  String mail = "";
+  String pwd = "";
+  String tipo = "";
+  String pic = "https://cdn-icons-png.flaticon.com/512/1361/1361728.png";
   List<Step> stepList() => [
     Step(
         title: const Text('Datos personales'),
@@ -41,6 +53,9 @@ class _CreateState extends State<Create> {
                 border: OutlineInputBorder(),
                 labelText: 'Nombres',
               ),
+              onChanged: (val){
+                nombre= val;
+              },
             ),
             SizedBox(
               height: 8,
@@ -58,6 +73,9 @@ class _CreateState extends State<Create> {
                 border: OutlineInputBorder(),
                 labelText: 'Apellidos',
               ),
+              onChanged: (val){
+                apellido = val;
+              },
             ),
             SizedBox(
               height: 8,
@@ -75,6 +93,9 @@ class _CreateState extends State<Create> {
                 border: OutlineInputBorder(),
                 labelText: 'Correo electrónico',
               ),
+              onChanged: (val){
+                mail=val;
+              },
             ),
             SizedBox(
               height: 8,
@@ -93,6 +114,9 @@ class _CreateState extends State<Create> {
                 border: OutlineInputBorder(),
                 labelText: 'Contraseña',
               ),
+              onChanged: (val){
+                pwd = val;
+              },
             ),
             SizedBox(
               height: 8,
@@ -132,12 +156,13 @@ class _CreateState extends State<Create> {
                   padding: const EdgeInsets.all(1.0),
                   child: Card(
                     shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15.0)),
-                    child: new InkWell(
+                    child: InkWell(
                       onTap: () { 
                         setState(() {
                           isChecked = true;
                           _colorContainer1 = Colors.blue.withOpacity(0.3);
                           _colorContainer2 = Colors.transparent;
+                          tipo = "Mensual";
                         });
                     },
                     child: Container(
@@ -148,7 +173,7 @@ class _CreateState extends State<Create> {
                         children: [
                           Container(
                             width: MediaQuery.of(context).size.width*0.55,
-                            child: Column(
+                            child: const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Plan Mensual',style: TextStyle(fontWeight: FontWeight.bold)),
@@ -164,7 +189,7 @@ class _CreateState extends State<Create> {
                           Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: Container(
-                              child: Text(
+                              child: const Text(
                                 'S/. 20',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
                               ),
                             ),
@@ -179,12 +204,13 @@ class _CreateState extends State<Create> {
                   padding: const EdgeInsets.all(1.0),
                   child: Card(
                     shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15.0)),
-                    child: new InkWell(
+                    child: InkWell(
                       onTap: () { 
                         setState(() {
                           isChecked = true;
                           _colorContainer1 = Colors.transparent;
                           _colorContainer2 = Colors.blue.withOpacity(0.3);
+                          tipo = "Anual";
                         });
                     },
                     child: Container(
@@ -195,7 +221,7 @@ class _CreateState extends State<Create> {
                         children: [
                           Container(
                             width: MediaQuery.of(context).size.width*0.55,
-                            child: Column(
+                            child: const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Plan Anual',style: TextStyle(fontWeight: FontWeight.bold)),
@@ -210,7 +236,7 @@ class _CreateState extends State<Create> {
                           Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: Container(
-                              child: Text(
+                              child: const Text(
                                 'S/. 200',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
                               ),
                             ),
@@ -373,7 +399,8 @@ class _CreateState extends State<Create> {
               });
             }
           } else if (_keyForm2.currentState!.validate() && _currentStep == 2){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> Home()));
+            register();
+            //Navigator.push(context, MaterialPageRoute(builder: (context)=> Home()));
           }
         },
         onStepCancel: (){
@@ -390,5 +417,61 @@ class _CreateState extends State<Create> {
         },
       ),
     );
+  }
+
+  void error(){
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Error'),
+        content: const Text('Ocurrio un error al realizar el registro'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void success(){
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Exito'),
+        content: const Text('registro existoso'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> register() async{
+    dynamic creds = registerModel(name: nombre, surname: apellido, email: mail,photo: pic, password: pwd ,phone: "12345");
+    dynamic res = await authApi.register(creds);
+    var decoded = jsonDecode(res.body);
+    print(decoded);
+    dynamic sub = Subscription(type: tipo, start: '19/11/2023', end: '19/11/2024', userId: decoded['id']);
+
+    dynamic response = await authApi.createSub(sub);
+
+    if(response == 201){
+      success();
+    }
+    else{
+      error();
+    }
+    //print(response);
+
+
   }
 }

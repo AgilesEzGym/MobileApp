@@ -1,3 +1,4 @@
+import 'package:ezgym/models/subscription.dart';
 import 'package:flutter/material.dart';
 import 'package:ezgym/services/userApi.dart';
 
@@ -12,8 +13,9 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
 
-  String id = '2';
+  String id = '655a78da3baaac2cab4500bb';
   profileModel perfil = profileModel(photo: "https://cdn-icons-png.flaticon.com/512/1361/1361728.png");
+  List<Subscription> sub = [];
 
   @override
   void initState() {
@@ -40,7 +42,7 @@ class _ProfileState extends State<Profile> {
               height: 200,
               decoration: BoxDecoration(
                 border: Border.all(width: 3, color: Colors.white),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     spreadRadius: 2,
                     color: Colors.grey,
@@ -107,21 +109,24 @@ class _ProfileState extends State<Profile> {
             Row(
               children: [
                 const Text('Tipo: ',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                Text("${perfil.subscription?.type}",style: TextStyle(fontSize: 16)),
+                if(sub.isNotEmpty)
+                Text("${sub[0]?.type}",style: TextStyle(fontSize: 16)),
               ],
             ),
             const SizedBox(height: 5),
             Row(
               children: [
                 const Text('Inicio: ',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                Text("${perfil.subscription?.start}",style: TextStyle(fontSize: 16)),
+                if(sub.isNotEmpty)
+                Text("${sub[0]?.start}",style: TextStyle(fontSize: 16)),
               ],
             ),
             const SizedBox(height: 5),
             Row(
               children: [
                 const Text('Fin: ',style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                Text("${perfil.subscription?.end}",style: TextStyle(fontSize: 16)),
+                if(sub.isNotEmpty)
+                Text("${sub[0]?.end}",style: TextStyle(fontSize: 16)),
               ],
             ),
             const SizedBox(height: 10),
@@ -163,8 +168,11 @@ class _ProfileState extends State<Profile> {
 
   Future<void> fetch() async{
     final response = await UserApi.fetchProfile(id);
+    final subs =  await UserApi.getSub(id);
+
     setState(() {
       perfil = response;
+      sub = subs;
     });
     print(perfil.name);
   }
