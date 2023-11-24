@@ -59,6 +59,7 @@ class _LatestState extends State<Latest> {
     final response = await RoutineApi.fetchRoutines();
     setState(() {
       rutinas = response;
+      rutinas = rutinas.reversed.toList();
     });
   }
 }
