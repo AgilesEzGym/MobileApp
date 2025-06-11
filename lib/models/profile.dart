@@ -9,12 +9,12 @@ class profileModel {
 
   profileModel(
       {this.sId,
-        this.name,
-        this.surname,
-        this.email,
-        this.password,
-        this.phone,
-        this.photo});
+      this.name,
+      this.surname,
+      this.email,
+      this.password,
+      this.phone,
+      this.photo});
 
   profileModel.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -35,6 +35,16 @@ class profileModel {
     data['password'] = this.password;
     data['phone'] = this.phone;
     data['photo'] = this.photo;
+    return data;
+  }
+
+  Map<String, dynamic> toUpdateJson() {
+    final Map<String, dynamic> data = {};
+    if (name != null) data['name'] = name;
+    if (surname != null) data['surname'] = surname;
+    if (email != null) data['email'] = email;
+    if (phone != null) data['phone'] = phone;
+    if (photo != null) data['photo'] = photo;
     return data;
   }
 }
