@@ -16,24 +16,33 @@ class Nav extends StatefulWidget {
 
 class _NavState extends State<Nav> {
   final storage = FlutterSecureStorage();
-  late String id;
+  String? id; // Ya no es late
   int currentPageIndex = 0;
+  bool isLoading = true;
 
   @override
   void initState() {
+    super.initState();
     setParams();
   }
+
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-          onDestinationSelected: (int index){
+        onDestinationSelected: (int index) {
           setState(() {
             currentPageIndex = index;
           });
         },
         selectedIndex: currentPageIndex,
-        destinations: const<Widget>[
+        destinations: const <Widget>[
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
           NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
           NavigationDestination(icon: Icon(Icons.favorite), label: 'Favorites'),
@@ -44,15 +53,17 @@ class _NavState extends State<Nav> {
         Home(),
         Search(),
         Favourites(),
-        Profile(id: id)
+        Profile(id: id!) // id estará inicializado aquí
       ][currentPageIndex],
     );
   }
-  void setParams() async{
+
+  void setParams() async {
     var uid = await storage.read(key: 'id');
     setState(() {
-      id= uid.toString();
+      id = uid;
+      isLoading = false;
     });
-    print(id);
+    print("User ID: $id");
   }
 }
