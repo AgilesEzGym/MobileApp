@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:ezgym/models/profile.dart';
 import 'package:ezgym/models/subscription.dart';
+import 'package:ezgym/services/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class UserApi {
   static Future<profileModel> fetchProfile(String id) async {
-    var url = 'http://10.0.2.2:8080/api/v1/users/$id';
-    final uri = Uri.parse(url);
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/v1/users/$id');
     final response = await http.get(uri);
     final body = response.body;
     final json = jsonDecode(body);
@@ -18,8 +18,8 @@ class UserApi {
   }
 
   static Future<List<Subscription>> getSub(String id) async {
-    var url = 'http://10.0.2.2:8080/api/v1/subscriptions/userId/$id';
-    final uri = Uri.parse(url);
+    final uri =
+        Uri.parse('${ApiConfig.baseUrl}/api/v1/subscriptions/userId/$id');
     final response = await http.get(uri);
     final body = response.body;
     final json = jsonDecode(body);
@@ -31,8 +31,7 @@ class UserApi {
   }
 
   static Future<bool> updateProfile(String id, profileModel perfil) async {
-    var url = 'http://10.0.2.2:8080/api/v1/users/$id';
-    final uri = Uri.parse(url);
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/v1/users/$id');
 
     final jsonBody = jsonEncode(perfil.toUpdateJson());
 
