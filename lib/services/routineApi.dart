@@ -48,6 +48,7 @@ class RoutineApi {
     final response = await http.get(uri);
     final body = response.body;
     final json = jsonDecode(body);
+    print(id);
     print(json);
     final results = json as List<dynamic>;
     final transformed = results.map((e) {
