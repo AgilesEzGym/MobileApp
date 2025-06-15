@@ -13,7 +13,7 @@ class authApi {
 
   static Future<dynamic> register(dynamic creds) async {
     final headers = {"Content-type": "application/json"};
-    const url = 'http://10.0.2.2:8080/api/v1/users/register';
+    const url = 'http://18.215.155.147:8080/api/v1/users/register';
     final uri = Uri.parse(url);
     final json = jsonEncode(creds);
     //print(json);
