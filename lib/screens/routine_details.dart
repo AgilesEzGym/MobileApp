@@ -32,14 +32,14 @@ class _RoutineDetailsState extends State<RoutineDetails> {
         centerTitle: true,
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
-        actions: <Widget>[
-          IconButton(onPressed: (){
-            print("fav");
-            
-          }, icon: const Icon(
-            CupertinoIcons.heart_solid,
-            color: Colors.black,
-          )),
+        actions: <Widget>[IconButton(onPressed: (){
+          print("fav");
+
+        }, icon: const Icon(
+          CupertinoIcons.heart_solid,
+          color: Colors.black,
+        ))
+          ,
           IconButton(onPressed: (){
             print("rate");
             showMessage();

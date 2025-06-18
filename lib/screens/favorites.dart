@@ -46,7 +46,26 @@ class _FavouritesState extends State<Favourites> {
                 ),
                 title: Text("${rutina.name}"),
                 subtitle: Text("${rutina.difficulty}"),
-                trailing: const Icon(CupertinoIcons.heart_fill, color: Colors.red),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min, // Importante para que no use todo el ancho
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        // Acción del botón de compartir o el que quieras
+                        print("Eliminar favorito");
+                      },
+                      icon: const Icon(CupertinoIcons.heart_fill, color: Colors.red),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // Acción del botón de compartir o el que quieras
+                        //print("Compartir rutina");
+                        _showShareDialog(context);
+                      },
+                      icon: const Icon(CupertinoIcons.share, color: Colors.blue),
+                    ),
+                  ],
+                ),
                 onTap: (){
                   Navigator.push(
                     context,
@@ -62,7 +81,69 @@ class _FavouritesState extends State<Favourites> {
       )
     );
   }
+  void _showShareDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Share this exercise with friends!"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row (
+              children: [
+                Expanded(
+                  child: Text(
+                    "routineLink",
+                    style: const TextStyle(color: Colors.blue),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  onPressed: () {
+                    print("Compartir rutina");
+                  },
+                ),
+              ],
+            ),
 
+            const SizedBox(height: 20),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    icon: const Icon(CupertinoIcons.share, color: Colors.green),
+                    onPressed: () {
+                      // Add WhatsApp share logic here
+                      // You can use `url_launcher`
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(CupertinoIcons.share, color: Colors.blue),
+                    onPressed: () {
+                      // Add WhatsApp share logic here
+                      // You can use `url_launcher`
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(CupertinoIcons.share, color: Colors.orange),
+                    onPressed: () {
+                      // Add WhatsApp share logic here
+                      // You can use `url_launcher`
+                    },
+                  ),
+                ]
+            ),
+          ]
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Close"),
+          ),
+        ],
+      )
+    );
+  }
   Future<void> fetchRoutines() async{
     final response = await RoutineApi.fetchRoutines();
     setState(() {
