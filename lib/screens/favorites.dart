@@ -1,7 +1,8 @@
 import 'package:ezgym/screens/routine_details.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/routine.dart';
 import '../services/routineApi.dart';
 
@@ -60,7 +61,7 @@ class _FavouritesState extends State<Favourites> {
                       onPressed: () {
                         // Acción del botón de compartir o el que quieras
                         //print("Compartir rutina");
-                        _showShareDialog(context);
+                        _showShareDialog(context, rutina);
                       },
                       icon: const Icon(CupertinoIcons.share, color: Colors.blue),
                     ),
@@ -81,7 +82,8 @@ class _FavouritesState extends State<Favourites> {
       )
     );
   }
-  void _showShareDialog(BuildContext context) {
+  void _showShareDialog(BuildContext context, Routine rutina) {
+    final routineLink = "https://ezgym.app/routine/${rutina.sId}"; //  link
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -100,38 +102,24 @@ class _FavouritesState extends State<Favourites> {
                 IconButton(
                   icon: const Icon(Icons.copy),
                   onPressed: () {
-                    print("Compartir rutina");
+                    Clipboard.setData(ClipboardData(text: routineLink));
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Link copied to clipboard!')),
+                    );
                   },
                 ),
               ],
             ),
 
             const SizedBox(height: 20),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: const Icon(CupertinoIcons.share, color: Colors.green),
-                    onPressed: () {
-                      // Add WhatsApp share logic here
-                      // You can use `url_launcher`
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(CupertinoIcons.share, color: Colors.blue),
-                    onPressed: () {
-                      // Add WhatsApp share logic here
-                      // You can use `url_launcher`
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(CupertinoIcons.share, color: Colors.orange),
-                    onPressed: () {
-                      // Add WhatsApp share logic here
-                      // You can use `url_launcher`
-                    },
-                  ),
-                ]
+            TextButton(
+              child: const Text("Share this excercise!"),
+              onPressed: () {
+                SharePlus.instance.share(
+                    ShareParams(text: 'Check out this routine! 💪 $routineLink')
+                );
+              },
             ),
           ]
         ),
