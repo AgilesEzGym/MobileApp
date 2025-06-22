@@ -2,12 +2,11 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'models/push_up_model.dart';
-
 
 Future<String> getAssetPath(String asset) async {
   final path = await getLocalPath(asset);
@@ -46,10 +45,13 @@ double angle(
 PushUpState? isPushUp(double angleElbow, PushUpState current) {
   final umbralElbow = 60.0;
   final umbralElbowExt = 160.0;
-  if(current == PushUpState.neutral && angleElbow > umbralElbow && angleElbow < 180.0  ){
+  if (current == PushUpState.neutral &&
+      angleElbow > umbralElbow &&
+      angleElbow < 180.0) {
     return PushUpState.init;
-
-  }else if( current == PushUpState.init && angleElbow < umbralElbowExt && angleElbow > 40.0){
+  } else if (current == PushUpState.init &&
+      angleElbow < umbralElbowExt &&
+      angleElbow > 40.0) {
     return PushUpState.complete;
-}
+  }
 }

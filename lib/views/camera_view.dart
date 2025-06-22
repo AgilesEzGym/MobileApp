@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:ezgym/util/n21_convertor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
-import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import '../models/push_up_model.dart';
 import '../painters/pose_painter.dart';
 import '../utils.dart' as utils;
@@ -412,59 +412,81 @@ class _CameraViewState extends State<CameraView> {
   };
 
   InputImage? _inputImageFromCameraImage(CameraImage image) {
-    if (_controller == null) return null;
+    if (_controller == null) {
+      print('Controller is null');
+      return null;
+    }
 
-    // get image rotation
-    // it is used in android to convert the InputImage from Dart to Java: https://github.com/flutter-ml/google_ml_kit_flutter/blob/master/packages/google_mlkit_commons/android/src/main/java/com/google_mlkit_commons/InputImageConverter.java
-    // `rotation` is not used in iOS to convert the InputImage from Dart to Obj-C: https://github.com/flutter-ml/google_ml_kit_flutter/blob/master/packages/google_mlkit_commons/ios/Classes/MLKVisionImage%2BFlutterPlugin.m
-    // in both platforms `rotation` and `camera.lensDirection` can be used to compensate `x` and `y` coordinates on a canvas: https://github.com/flutter-ml/google_ml_kit_flutter/blob/master/packages/example/lib/vision_detector_views/painters/coordinates_translator.dart
     final camera = _cameras[_cameraIndex];
     final sensorOrientation = camera.sensorOrientation;
     // print(
-    //     'lensDirection: ${camera.lensDirection}, sensorOrientation: $sensorOrientation, ${_controller?.value.deviceOrientation} ${_controller?.value.lockedCaptureOrientation} ${_controller?.value.isCaptureOrientationLocked}');
+    //     'Camera lensDirection: ${camera.lensDirection}, sensorOrientation: $sensorOrientation');
+
     InputImageRotation? rotation;
     if (Platform.isIOS) {
       rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
+      print('iOS rotation: $rotation');
     } else if (Platform.isAndroid) {
       var rotationCompensation =
           _orientations[_controller!.value.deviceOrientation];
-      if (rotationCompensation == null) return null;
+      if (rotationCompensation == null) {
+        print('rotationCompensation is null');
+        return null;
+      }
+
       if (camera.lensDirection == CameraLensDirection.front) {
-        // front-facing
         rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
       } else {
-        // back-facing
         rotationCompensation =
             (sensorOrientation - rotationCompensation + 360) % 360;
       }
       rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
-      // print('rotationCompensation: $rotationCompensation');
+      // print(
+      //     'Android rotationCompensation: $rotationCompensation, final rotation: $rotation');
     }
-    if (rotation == null) return null;
-    // print('final rotation: $rotation');
 
-    // get image format
+    if (rotation == null) {
+      print('Rotation is null');
+      return null;
+    }
+
     final format = InputImageFormatValue.fromRawValue(image.format.raw);
-    // validate format depending on platform
-    // only supported formats:
-    // * nv21 for Android
-    // * bgra8888 for iOS
+    //print('Raw format: ${image.format.raw}, interpreted format: $format');
+
     if (format == null ||
-        (Platform.isAndroid && format != InputImageFormat.nv21) ||
-        (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
+        (Platform.isAndroid &&
+            format != InputImageFormat.nv21 &&
+            format != InputImageFormat.yuv_420_888) ||
+        (Platform.isIOS && format != InputImageFormat.bgra8888)) {
+      print('Unsupported image format: $format');
+      return null;
+    }
 
-    // since format is constraint to nv21 or bgra8888, both only have one plane
-    if (image.planes.length != 1) return null;
-    final plane = image.planes.first;
+// solo hacer este chequeo para formatos de un solo plano
+    if ((format == InputImageFormat.nv21 ||
+            format == InputImageFormat.bgra8888) &&
+        image.planes.length != 1) {
+      print(
+          'Expected 1 plane for format $format but got ${image.planes.length}');
+      return null;
+    }
 
-    // compose InputImage using bytes
+// Usa el convertidor si es yuv_420_888
+    Uint8List bytes;
+    if (format == InputImageFormat.yuv_420_888) {
+      bytes = image.getNv21Uint8List();
+      // print('Converted YUV_420_888 to NV21, byte length: ${bytes.length}');
+    } else {
+      bytes = image.planes.first.bytes;
+    }
+
     return InputImage.fromBytes(
-      bytes: plane.bytes,
+      bytes: bytes,
       metadata: InputImageMetadata(
         size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: rotation, // used only in Android
-        format: format, // used only in iOS
-        bytesPerRow: plane.bytesPerRow, // used only in iOS
+        rotation: rotation,
+        format: InputImageFormat.nv21,
+        bytesPerRow: image.planes.first.bytesPerRow,
       ),
     );
   }
