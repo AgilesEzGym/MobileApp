@@ -35,6 +35,7 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
+  bool _canProcess = true;
   final AudioPlayer _audioPlayer = AudioPlayer();
   static List<CameraDescription> _cameras = [];
   CameraController? _controller;
@@ -151,9 +152,15 @@ class _CameraViewState extends State<CameraView> {
                 ? Center(
                     child: const Text('Changing camera lens'),
                   )
-                : CameraPreview(
-                    _controller!,
-                    child: widget.customPaint,
+                : Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CameraPreview(_controller!),
+                      if (widget.customPaint != null)
+                        RepaintBoundary(
+                          child: widget.customPaint!,
+                        ),
+                    ],
                   ),
           ),
           _counterWidget(),
@@ -366,7 +373,7 @@ class _CameraViewState extends State<CameraView> {
     _controller = CameraController(
       camera,
       // Set to ResolutionPreset.high. Do NOT set it to ResolutionPreset.max because for some phones does NOT work.
-      ResolutionPreset.high,
+      ResolutionPreset.medium,
       enableAudio: false,
       imageFormatGroup: Platform.isAndroid
           ? ImageFormatGroup.nv21
@@ -418,6 +425,13 @@ class _CameraViewState extends State<CameraView> {
   }
 
   void _processCameraImage(CameraImage image) {
+    if (!_canProcess) return;
+    _canProcess = false;
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _canProcess = true;
+    });
+
     final inputImage = _inputImageFromCameraImage(image);
     if (inputImage == null) return;
     widget.onImage(inputImage);
