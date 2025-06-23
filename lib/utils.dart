@@ -43,15 +43,20 @@ double angle(
 }
 
 PushUpState? isPushUp(double angleElbow, PushUpState current) {
-  final umbralElbow = 60.0;
-  final umbralElbowExt = 160.0;
-  if (current == PushUpState.neutral &&
-      angleElbow > umbralElbow &&
-      angleElbow < 180.0) {
+  const thresholdDown = 75.0; // codo muy doblado (abajo)
+  const thresholdUp = 160.0; // codo extendido (arriba)
+
+  print('[DEBUG isPushUp] Angle: $angleElbow | Current: $current');
+
+  if (current == PushUpState.neutral && angleElbow < thresholdDown) {
+    print('[DEBUG isPushUp] -> init');
     return PushUpState.init;
-  } else if (current == PushUpState.init &&
-      angleElbow < umbralElbowExt &&
-      angleElbow > 40.0) {
+  }
+
+  if (current == PushUpState.init && angleElbow > thresholdUp) {
+    print('[DEBUG isPushUp] -> complete');
     return PushUpState.complete;
   }
+
+  return null;
 }
