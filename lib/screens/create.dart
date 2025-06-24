@@ -492,8 +492,9 @@ class _CreateState extends State<Create> {
       }
     }
 
+    DateTime now = DateTime.now();
 
-    dynamic sub = Subscription(type: tipo, start: '19/11/2023', end: '19/11/2024', userId: decoded['id']);
+    dynamic sub = Subscription(type: tipo, start: "${now.day}/${now.month}/${now.year}", end: "${now.add(Duration(days: 30)).day}/${now.add(Duration(days: 30)).month}/${now.add(Duration(days: 30)).year}", userId: decoded['id']);
 
     dynamic response_sub = await authApi.createSub(sub);
 
