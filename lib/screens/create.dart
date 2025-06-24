@@ -87,6 +87,10 @@ class _CreateState extends State<Create> {
                 if (value!.isEmpty) {
                   return 'Campo obligatorio';
                 }
+                final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+com$');
+                if (!emailRegex.hasMatch(value)) {
+                  return 'Correo no válido';
+                }
                 return null;
               },
               decoration: InputDecoration(
@@ -436,7 +440,23 @@ class _CreateState extends State<Create> {
       ),
     );
   }
-
+  void errorEmail() {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Correo en uso'),
+        content: const Text('El correo elegido ya está registrado en el sistema.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
   void success(){
     showDialog<String>(
       context: context,
@@ -457,21 +477,33 @@ class _CreateState extends State<Create> {
 
   Future<void> register() async{
     dynamic creds = registerModel(name: nombre, surname: apellido, email: mail,photo: pic, password: pwd ,phone: "12345");
-    dynamic res = await authApi.register(creds);
-    var decoded = jsonDecode(res.body);
+    dynamic response_cred = await authApi.register(creds);
+    var decoded = jsonDecode(response_cred.body);
     print(decoded);
+
+    if(response_cred == 400 || response_cred.statusCode == 409){
+      if (decoded['errors'].contains("Email already taken")) {
+        errorEmail();
+        return;
+      }
+      else{
+        error();
+        return;
+      }
+    }
+
+
     dynamic sub = Subscription(type: tipo, start: '19/11/2023', end: '19/11/2024', userId: decoded['id']);
 
-    dynamic response = await authApi.createSub(sub);
+    dynamic response_sub = await authApi.createSub(sub);
 
-    if(response == 201){
+    if(response_sub == 201){
       success();
     }
     else{
       error();
+      return;
     }
     //print(response);
-
-
   }
 }
