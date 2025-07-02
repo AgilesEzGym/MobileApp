@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:ezgym/models/loginModel.dart';
 import 'package:ezgym/models/registerModel.dart';
 import 'package:ezgym/screens/home.dart';
 import 'package:ezgym/screens/login.dart';
 import 'package:ezgym/services/authApi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/subscription.dart';
 
@@ -500,11 +502,32 @@ class _CreateState extends State<Create> {
 
     if(response_sub == 201){
       success();
+      loggear(mail, pwd);
     }
     else{
       error();
       return;
     }
     //print(response);
+  }
+
+
+  Future<void> loggear(String _email,String _password) async {
+    var creds = loginModel(email: _email, password: _password);
+    var json = creds.toJson();
+    var storage = FlutterSecureStorage();
+    var response = await authApi.login(json);
+    var decoded = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      print(decoded['id']);
+      await storage.write(key: 'id', value: decoded['id']);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Home(welcomeMessage: "¡Bienvenid@ a EzGym, $nombre!"),
+        ),
+      );
+    }
   }
 }

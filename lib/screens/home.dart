@@ -9,7 +9,9 @@ import '../models/routine.dart';
 import '../widgets/recommended.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  final String? welcomeMessage;
+
+  const Home({Key? key, this.welcomeMessage}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -18,7 +20,20 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<Routine> rutinas = [];
 
-
+  @override
+  void initState() {
+    super.initState();
+    if (widget.welcomeMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.welcomeMessage!),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
