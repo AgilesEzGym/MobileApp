@@ -83,7 +83,8 @@ class _FavouritesState extends State<Favourites> {
     );
   }
   void _showShareDialog(BuildContext context, Routine rutina) {
-    final routineLink = "https://ezgym.app/routine/${rutina.sId}"; //  link
+    //final routineLink = "https://ezgym.app/routine/${rutina.sId}"; //  link
+    final routineLink = 'https://ezgym.app/routine/${rutina.sId}';
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -95,7 +96,7 @@ class _FavouritesState extends State<Favourites> {
               children: [
                 Expanded(
                   child: Text(
-                    "routineLink",
+                    "$routineLink",
                     style: const TextStyle(color: Colors.blue),
                   ),
                 ),
