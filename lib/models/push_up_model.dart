@@ -1,26 +1,33 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-enum PushUpState{
+enum PushUpState {
   neutral,
   init,
-  complete
+  complete,
 }
 
-class PushUpCounter extends Cubit<PushUpState>{
-  PushUpCounter() : super(PushUpState.neutral);
+class PushUpStatus {
+  final int counter;
+  final PushUpState state;
 
-  int counter = 0;
+  PushUpStatus({
+    required this.counter,
+    required this.state,
+  });
+}
 
-  void setPushUpState(PushUpState state){
-    emit(state);
+class PushUpCounter extends Cubit<PushUpStatus> {
+  PushUpCounter() : super(PushUpStatus(counter: 0, state: PushUpState.neutral));
+
+  void setPushUpState(PushUpState newState) {
+    emit(PushUpStatus(counter: state.counter, state: newState));
   }
 
-  void increment(){
-    counter++;
-    emit(state);
+  void increment() {
+    emit(PushUpStatus(counter: state.counter + 1, state: PushUpState.neutral));
   }
-  void reset(){
-    counter = 0;
-    emit(state);
+
+  void reset() {
+    emit(PushUpStatus(counter: 0, state: PushUpState.neutral));
   }
 }

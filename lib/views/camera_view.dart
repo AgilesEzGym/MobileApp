@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:ezgym/util/n21_convertor.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,8 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
+  bool _canProcess = true;
+  final AudioPlayer _audioPlayer = AudioPlayer();
   static List<CameraDescription> _cameras = [];
   CameraController? _controller;
   int _cameraIndex = -1;
@@ -73,36 +76,55 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   void didUpdateWidget(covariant CameraView oldWidget) {
-    if (widget.customPaint != oldWidget.customPaint) {
-      if (widget.customPaint != null) return;
-      final bloc = BlocProvider.of<PushUpCounter>(context);
-      for (final pose in widget.posePainter!.poses) {
-        PoseLandmark getPseLandmark(PoseLandmarkType type1) {
-          final PoseLandmark joint1 = pose.landmarks[type1]!;
-          return joint1;
-        }
+    super.didUpdateWidget(oldWidget);
 
-        p1 = getPseLandmark(PoseLandmarkType.rightShoulder);
-        p2 = getPseLandmark(PoseLandmarkType.rightElbow);
-        p3 = getPseLandmark(PoseLandmarkType.rightWrist);
+    if (widget.customPaint != oldWidget.customPaint) {
+      print('[DEBUG] CustomPaint changed, checking poses');
+
+      final bloc = BlocProvider.of<PushUpCounter>(context);
+
+      if (widget.posePainter == null || widget.posePainter!.poses.isEmpty) {
+        print('[DEBUG] No poses found');
+        return;
       }
-      //verificar
-      if (p1 != null && p2 != null && p3 != null) {
-        final rtaAngle = utils.angle(p1!, p2!, p3!);
-        final rta = utils.isPushUp(rtaAngle, bloc.state);
-        print('Angulo: ${rtaAngle.toStringAsFixed(2)}');
-        if (rta != null) {
-          if (rta == PushUpState.init) {
-            bloc.setPushUpState(rta);
-          } else if (rta == PushUpState.complete) {
-            bloc.increment();
-            bloc.setPushUpState(PushUpState.neutral); //reiniciar
+
+      for (final pose in widget.posePainter!.poses) {
+        print('[DEBUG] Processing pose...');
+
+        try {
+          final p1 = pose.landmarks[PoseLandmarkType.rightShoulder];
+          final p2 = pose.landmarks[PoseLandmarkType.rightElbow];
+          final p3 = pose.landmarks[PoseLandmarkType.rightWrist];
+
+          if (p1 == null || p2 == null || p3 == null) {
+            print('[DEBUG] Missing landmarks');
+            continue;
           }
+
+          final angle = utils.angle(p1, p2, p3);
+          print('[DEBUG] Elbow angle: ${angle.toStringAsFixed(2)}');
+
+          final newState = utils.isPushUp(angle, bloc.state.state);
+          print('[DEBUG] New state from angle: $newState');
+
+          if (newState != null) {
+            if (newState == PushUpState.init &&
+                bloc.state.state == PushUpState.neutral) {
+              bloc.setPushUpState(PushUpState.init);
+              print('[DEBUG] -> Estado INIT reconocido');
+            } else if (newState == PushUpState.complete &&
+                bloc.state.state == PushUpState.init) {
+              bloc.increment();
+              _audioPlayer.play(AssetSource('sounds/counter_up_complete.wav'));
+              bloc.setPushUpState(PushUpState.neutral); // volver a inicio
+              print('[DEBUG] -> Contador incrementado: ${bloc.state.counter}');
+            }
+          }
+        } catch (e) {
+          print('[ERROR] Failed to process pose: $e');
         }
       }
     }
-
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -130,9 +152,15 @@ class _CameraViewState extends State<CameraView> {
                 ? Center(
                     child: const Text('Changing camera lens'),
                   )
-                : CameraPreview(
-                    _controller!,
-                    child: widget.customPaint,
+                : Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CameraPreview(_controller!),
+                      if (widget.customPaint != null)
+                        RepaintBoundary(
+                          child: widget.customPaint!,
+                        ),
+                    ],
                   ),
           ),
           _counterWidget(),
@@ -147,40 +175,38 @@ class _CameraViewState extends State<CameraView> {
   }
 
   Widget _counterWidget() {
-    final bloc = BlocProvider.of<PushUpCounter>(context);
     return Positioned(
-      left: 0,
       top: 50,
+      left: 0,
       right: 0,
-      child: Container(
-        width: 70,
-        child: Column(
-          children: [
-            const Text(
-              'Counter',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14),
-            ),
-            Container(
-              width: 70,
-              decoration: BoxDecoration(
-                  color: Colors.black54,
-                  border: Border.all(
-                      color: Colors.white.withOpacity(0.4), width: 4.0),
-                  borderRadius: const BorderRadius.all(Radius.circular(12))),
-              child: Text(
-                '${bloc.counter}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.0,
-                    fontWeight: FontWeight.bold),
+      child: BlocBuilder<PushUpCounter, PushUpStatus>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              const Text(
+                'Counter',
+                style: TextStyle(color: Colors.white, fontSize: 14),
               ),
-            )
-          ],
-        ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.4), width: 4),
+                ),
+                child: Text(
+                  '${state.counter}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            ],
+          );
+        },
       ),
     );
   }
@@ -347,7 +373,7 @@ class _CameraViewState extends State<CameraView> {
     _controller = CameraController(
       camera,
       // Set to ResolutionPreset.high. Do NOT set it to ResolutionPreset.max because for some phones does NOT work.
-      ResolutionPreset.high,
+      ResolutionPreset.medium,
       enableAudio: false,
       imageFormatGroup: Platform.isAndroid
           ? ImageFormatGroup.nv21
@@ -399,6 +425,13 @@ class _CameraViewState extends State<CameraView> {
   }
 
   void _processCameraImage(CameraImage image) {
+    if (!_canProcess) return;
+    _canProcess = false;
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _canProcess = true;
+    });
+
     final inputImage = _inputImageFromCameraImage(image);
     if (inputImage == null) return;
     widget.onImage(inputImage);

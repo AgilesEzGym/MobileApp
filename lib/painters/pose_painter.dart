@@ -124,6 +124,12 @@ class PosePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant PosePainter oldDelegate) {
-    return oldDelegate.imageSize != imageSize || oldDelegate.poses != poses;
+    if (oldDelegate.imageSize != imageSize) return true;
+    if (oldDelegate.poses.length != poses.length) return true;
+
+    for (int i = 0; i < poses.length; i++) {
+      if (oldDelegate.poses[i] != poses[i]) return true;
+    }
+    return false;
   }
 }
