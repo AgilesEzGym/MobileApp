@@ -13,7 +13,45 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   String word = '';
   List<Routine> rutinas = [];
+  List<Routine> allRoutines = [];
+  List<String> routineTypes = [];
+  String selectedType = '';
   int maxDuration = 60;
+
+  @override
+  void initState() {
+    super.initState();
+    loadAllRoutines();
+  }
+
+  Future<void> loadAllRoutines() async {
+    try {
+      final response = await RoutineApi.fetchRoutines();
+      setState(() {
+        allRoutines = response;
+        rutinas = allRoutines;
+        routineTypes = allRoutines.map((e) => e.type ?? '').toSet().toList();
+      });
+    } catch (e) {
+      print("Error al cargar rutinas: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error al cargar rutinas")),
+      );
+    }
+  }
+
+  void filterRoutines() {
+    setState(() {
+      rutinas = allRoutines.where((r) {
+        final matchesName = word.trim().isEmpty ||
+            r.name!.toLowerCase().contains(word.toLowerCase());
+        final matchesType = selectedType.isEmpty || r.type == selectedType;
+        final matchesLength = r.lenght != null && r.lenght! <= maxDuration;
+
+        return matchesName && matchesType && matchesLength;
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +77,31 @@ class _SearchState extends State<Search> {
                 ),
                 onChanged: (value) {
                   word = value;
+                  filterRoutines();
+                },
+              ),
+            ),
+
+            // Dropdown para tipos
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: "Filtrar por tipo",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  ),
+                ),
+                items: routineTypes.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+                value: selectedType.isEmpty ? null : selectedType,
+                onChanged: (value) {
+                  selectedType = value ?? '';
+                  filterRoutines();
                 },
               ),
             ),
@@ -49,7 +112,7 @@ class _SearchState extends State<Search> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Duración máxima (minutos):"),
+                  const Text("Duración máxima (segundos):"),
                   Slider(
                     value: maxDuration.toDouble(),
                     min: 5,
@@ -57,9 +120,8 @@ class _SearchState extends State<Search> {
                     divisions: 23,
                     label: "$maxDuration min",
                     onChanged: (value) {
-                      setState(() {
-                        maxDuration = value.toInt();
-                      });
+                      maxDuration = value.toInt();
+                      filterRoutines();
                     },
                   ),
                 ],
@@ -69,72 +131,39 @@ class _SearchState extends State<Search> {
             // Lista de rutinas
             rutinas.isEmpty
                 ? const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Text("No hay resultados",
-                        style: TextStyle(fontSize: 16)),
-                  )
+              padding: EdgeInsets.all(20),
+              child: Text("No hay resultados",
+                  style: TextStyle(fontSize: 16)),
+            )
                 : ListView.builder(
-                    itemCount: rutinas.length,
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      final rutina = rutinas[index];
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(rutina.image ?? ''),
-                        ),
-                        title: Text(rutina.name ?? ''),
-                        subtitle:
-                            Text("Dificultad: ${rutina.difficulty ?? 'N/A'}"),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  RoutineDetails(rutina: rutina),
-                            ),
-                          );
-                        },
-                      );
-                    },
+              itemCount: rutinas.length,
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                final rutina = rutinas[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(rutina.image ?? ''),
                   ),
+                  title: Text(rutina.name ?? ''),
+                  subtitle:
+                  Text("Dificultad: ${rutina.difficulty ?? 'N/A'}"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            RoutineDetails(rutina: rutina),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),
-
-      // Botón de búsqueda
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white54,
-        child: const Icon(Icons.search, color: Colors.black),
-        onPressed: () {
-          search();
-        },
-      ),
     );
-  }
-
-  Future<void> search() async {
-    if (word.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Por favor ingrese un término de búsqueda")),
-      );
-      return;
-    }
-
-    try {
-      final response = await RoutineApi.searchRoutines(word);
-      setState(() {
-        rutinas = response
-            .where((r) => r.lenght != null && r.lenght! <= maxDuration)
-            .toList();
-      });
-    } catch (e) {
-      print("Error al buscar rutinas: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error al buscar rutinas")),
-      );
-    }
   }
 }
