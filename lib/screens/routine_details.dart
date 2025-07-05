@@ -149,7 +149,8 @@ class _RoutineDetailsState extends State<RoutineDetails> {
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (_) =>
-                                                      PoseDetectorView(),
+                                                      PoseDetectorView(
+                                                          exercise: exercise),
                                                 ));
                                             print("estimacion");
                                           },

@@ -1,27 +1,31 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
+import 'package:ezgym/models/exercise.dart';
+import 'package:ezgym/models/workoutSessionModel.dart';
 import 'package:ezgym/util/n21_convertor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/push_up_model.dart';
 import '../painters/pose_painter.dart';
 import '../utils.dart' as utils;
 
 class CameraView extends StatefulWidget {
   const CameraView(
-      {Key? key,
+      {super.key,
       required this.posePainter,
       required this.customPaint,
       required this.onImage,
       this.onCameraFeedReady,
       this.onDetectorViewModeChanged,
       this.onCameraLensDirectionChanged,
-      this.initialCameraLensDirection = CameraLensDirection.back})
-      : super(key: key);
+      this.exercise,
+      this.initialCameraLensDirection = CameraLensDirection.back});
   final PosePainter? posePainter;
   final CustomPaint? customPaint;
   final Function(InputImage inputImage) onImage;
@@ -29,12 +33,16 @@ class CameraView extends StatefulWidget {
   final VoidCallback? onDetectorViewModeChanged;
   final Function(CameraLensDirection direction)? onCameraLensDirectionChanged;
   final CameraLensDirection initialCameraLensDirection;
+  final Exercise? exercise;
 
   @override
   State<CameraView> createState() => _CameraViewState();
 }
 
 class _CameraViewState extends State<CameraView> {
+  DateTime? _startTime;
+  final int staticReps = 2;
+  bool _sessionCompleted = false;
   bool _canProcess = true;
   final AudioPlayer _audioPlayer = AudioPlayer();
   static List<CameraDescription> _cameras = [];
@@ -55,7 +63,7 @@ class _CameraViewState extends State<CameraView> {
   @override
   void initState() {
     super.initState();
-
+    _startTime = DateTime.now();
     _initialize();
   }
 
@@ -77,7 +85,7 @@ class _CameraViewState extends State<CameraView> {
   @override
   void didUpdateWidget(covariant CameraView oldWidget) {
     super.didUpdateWidget(oldWidget);
-
+    if (_sessionCompleted) return;
     if (widget.customPaint != oldWidget.customPaint) {
       print('[DEBUG] CustomPaint changed, checking poses');
 
@@ -118,6 +126,12 @@ class _CameraViewState extends State<CameraView> {
               _audioPlayer.play(AssetSource('sounds/counter_up_complete.wav'));
               bloc.setPushUpState(PushUpState.neutral); // volver a inicio
               print('[DEBUG] -> Contador incrementado: ${bloc.state.counter}');
+
+              final excersiceReps = widget.exercise?.reps ?? staticReps;
+              print('[DEBUG] -> REPS: ${excersiceReps}');
+              if (bloc.state.counter >= excersiceReps) {
+                guardarYMostrarDialogo(bloc.state.counter);
+              }
             }
           }
         } catch (e) {
@@ -125,6 +139,47 @@ class _CameraViewState extends State<CameraView> {
         }
       }
     }
+  }
+
+  void guardarYMostrarDialogo(int counterFinal) async {
+    _sessionCompleted = true;
+    final endTime = DateTime.now();
+    final duration = endTime.difference(_startTime!);
+
+    final session = WorkoutSession(
+      exercise: "Push Ups",
+      reps: counterFinal,
+      startTime: _startTime!,
+      endTime: endTime,
+      user: "X",
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    final historyString = prefs.getString('history');
+    List<dynamic> history =
+        historyString != null ? jsonDecode(historyString) : [];
+    history.add(session.toJson());
+    await prefs.setString('history', jsonEncode(history));
+
+    final minutos = duration.inMinutes.toString().padLeft(2, '0');
+    final segundos = (duration.inSeconds % 60).toString().padLeft(2, '0');
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('¡Rutina completada!'),
+        content: Text(
+            'Completaste $counterFinal repeticiones en $minutos:$segundos minutos.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

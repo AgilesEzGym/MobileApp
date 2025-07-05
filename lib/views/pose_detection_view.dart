@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:ezgym/models/exercise.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
@@ -7,6 +8,8 @@ import '../painters/pose_painter.dart';
 import 'detector_view.dart';
 
 class PoseDetectorView extends StatefulWidget {
+  final Exercise? exercise;
+  const PoseDetectorView({super.key, this.exercise});
   @override
   State<StatefulWidget> createState() => _PoseDetectorViewState();
 }
@@ -39,6 +42,7 @@ class _PoseDetectorViewState extends State<PoseDetectorView> {
       onImage: _processImage,
       initialCameraLensDirection: _cameraLensDirection,
       onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
+      exercise: widget.exercise,
     );
   }
 

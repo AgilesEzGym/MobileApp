@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:ezgym/models/exercise.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 
@@ -9,8 +10,10 @@ import 'gallery_view.dart';
 enum DetectorViewMode { liveFeed, gallery }
 
 class DetectorView extends StatefulWidget {
+  final Exercise? exercise;
+
   const DetectorView({
-    Key? key,
+    super.key,
     required this.posePainter,
     required this.title,
     required this.onImage,
@@ -21,7 +24,8 @@ class DetectorView extends StatefulWidget {
     this.onCameraFeedReady,
     this.onDetectorViewModeChanged,
     this.onCameraLensDirectionChanged,
-  }) : super(key: key);
+    this.exercise,
+  });
 
   final PosePainter? posePainter;
   final String title;
@@ -58,6 +62,7 @@ class _DetectorViewState extends State<DetectorView> {
             onDetectorViewModeChanged: _onDetectorViewModeChanged,
             initialCameraLensDirection: widget.initialCameraLensDirection,
             onCameraLensDirectionChanged: widget.onCameraLensDirectionChanged,
+            exercise: widget.exercise,
           )
         : GalleryView(
             title: widget.title,
