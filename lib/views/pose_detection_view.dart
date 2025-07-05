@@ -1,7 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:ezgym/models/exercise.dart';
+import 'package:ezgym/models/push_up_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
 import '../painters/pose_painter.dart';
@@ -24,6 +26,11 @@ class _PoseDetectorViewState extends State<PoseDetectorView> {
   PosePainter? _posePainter;
 
   var _cameraLensDirection = CameraLensDirection.back;
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<PushUpCounter>(context).reset(); //  Reinicia el contador
+  }
 
   @override
   void dispose() async {

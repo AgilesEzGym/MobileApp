@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:ezgym/models/exercise.dart';
 import 'package:ezgym/models/workoutSessionModel.dart';
+import 'package:ezgym/screens/workout_history_screen.dart';
 import 'package:ezgym/util/n21_convertor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -147,7 +148,8 @@ class _CameraViewState extends State<CameraView> {
     final duration = endTime.difference(_startTime!);
 
     final session = WorkoutSession(
-      exercise: "Push Ups",
+      exerciseId: widget.exercise?.sId ?? '',
+      exercise: widget.exercise?.name ?? '',
       reps: counterFinal,
       startTime: _startTime!,
       endTime: endTime,
@@ -168,14 +170,29 @@ class _CameraViewState extends State<CameraView> {
 
     showDialog(
       context: context,
+      barrierDismissible: false, // para que no se cierre tocando fuera
       builder: (_) => AlertDialog(
         title: const Text('¡Rutina completada!'),
         content: Text(
-            'Completaste $counterFinal repeticiones en $minutos:$segundos minutos.'),
+          'Completaste $counterFinal repeticiones en $minutos:$segundos minutos.',
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop(); // Cierra el diálogo
+              Navigator.of(context).pop(); // Regresa a la pantalla anterior
+            },
+            child: const Text('Volver'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Cierra el diálogo
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const WorkoutHistoryScreen()),
+              );
+            },
+            child: const Text('Ver historial'),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 class WorkoutSession {
+  final String exerciseId;
   final String exercise;
   final int reps;
   final DateTime startTime;
@@ -6,6 +7,7 @@ class WorkoutSession {
   final String user;
 
   WorkoutSession({
+    required this.exerciseId,
     required this.exercise,
     required this.reps,
     required this.startTime,
@@ -27,6 +29,7 @@ class WorkoutSession {
     ][weekdayIndex];
 
     return {
+      "exerciseId": exerciseId,
       "exercise": exercise,
       "reps": reps,
       "duration_seconds": duration.inSeconds,
@@ -41,5 +44,16 @@ class WorkoutSession {
       "weekday_index": weekdayIndex,
       "user": user,
     };
+  }
+
+  factory WorkoutSession.fromJson(Map<String, dynamic> json) {
+    return WorkoutSession(
+      exerciseId: json["exerciseId"] ?? '',
+      exercise: json["exercise"] ?? '',
+      reps: json["reps"] ?? 0,
+      startTime: DateTime.parse(json["start_time"]),
+      endTime: DateTime.parse(json["end_time"]),
+      user: json["user"] ?? '',
+    );
   }
 }
