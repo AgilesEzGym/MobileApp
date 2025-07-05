@@ -23,7 +23,7 @@ class _LatestState extends State<Latest> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 175.0,
+        height: 190.0,
         margin: const EdgeInsets.symmetric(vertical: 20),
         child: ListView.builder(
           scrollDirection: Axis.horizontal,

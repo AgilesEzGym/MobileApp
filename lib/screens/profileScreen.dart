@@ -1,4 +1,5 @@
 import 'package:ezgym/models/subscription.dart';
+import 'package:ezgym/screens/workout_history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ezgym/services/userApi.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -46,7 +47,18 @@ class _ProfileState extends State<Profile> {
         backgroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: const Icon(Icons.fitness_center, color: Colors.black),
+            tooltip: 'Historial',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => WorkoutHistoryScreen()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.edit, color: Colors.black),
+            tooltip: 'Editar perfil',
             onPressed: () async {
               final updated = await Navigator.push(
                 context,
