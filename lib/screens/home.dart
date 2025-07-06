@@ -18,8 +18,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<Routine> rutinas = [];
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,40 +25,46 @@ class _HomeState extends State<Home> {
         title: const Text('EzGym', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black)
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Container(
-        alignment: Alignment.center,
-        child: SingleChildScrollView(
-          child: const Column(
-              children: <Widget> [
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('¡Bienvenido Usuario!', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                Row(
-                children: [
-                  Text("Recomendaciones")
-                ],
-                ),
-                Recommended(),
-                Row(
-                  children: [
-                    Text("Ultimos agregados")
-                  ],
-                ),
-                Latest(),
-                Row(
-                  children: [
-                    Text("Rutinas favoritas")
-                  ],
-                ),
-                Favs()
-            ],
-          ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text(
+              '¡Bienvenido, Usuario!',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 25),
+            Text(
+              "🔁 Recomendaciones",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 10),
+            Recommended(),
+            SizedBox(height: 30),
+            Divider(thickness: 1.2),
+            SizedBox(height: 20),
+            Text(
+              "🆕 Últimos agregados",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 10),
+            Latest(),
+          ],
         ),
       ),
     );
   }
-
 }
