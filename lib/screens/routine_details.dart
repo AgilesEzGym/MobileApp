@@ -1,11 +1,12 @@
+import 'dart:convert';
 import 'package:ezgym/models/routine.dart';
 import 'package:ezgym/models/exercise.dart';
 import 'package:ezgym/services/routineApi.dart';
 import 'package:ezgym/widgets/youtube_video.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-
 import '../views/pose_detection_view.dart';
 
 class RoutineDetails extends StatefulWidget {
@@ -18,11 +19,46 @@ class RoutineDetails extends StatefulWidget {
 
 class _RoutineDetailsState extends State<RoutineDetails> {
   List<Exercise> ejercicios = [];
+  bool isFavorite = false;
 
   @override
   void initState() {
     super.initState();
     getExercices();
+    loadFavoriteStatus();
+  }
+
+  Future<void> loadFavoriteStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final favString = prefs.getString('favorites');
+    if (favString != null) {
+      final List<dynamic> favList = jsonDecode(favString);
+      final ids = favList.cast<String>();
+      setState(() {
+        isFavorite = ids.contains(widget.rutina.sId);
+      });
+    }
+  }
+
+  Future<void> toggleFavorite() async {
+    final prefs = await SharedPreferences.getInstance();
+    final favString = prefs.getString('favorites');
+    List<String> favIds =
+        favString != null ? List<String>.from(jsonDecode(favString)) : [];
+
+    setState(() {
+      if (isFavorite) {
+        favIds.remove(widget.rutina.sId);
+        isFavorite = false;
+      } else {
+        if (widget.rutina.sId != null) {
+          favIds.add(widget.rutina.sId!);
+        }
+        isFavorite = true;
+      }
+    });
+
+    await prefs.setString('favorites', jsonEncode(favIds));
   }
 
   @override
@@ -36,11 +72,9 @@ class _RoutineDetailsState extends State<RoutineDetails> {
         iconTheme: const IconThemeData(color: Colors.black),
         actions: <Widget>[
           IconButton(
-              onPressed: () {
-                print("fav");
-              },
-              icon: const Icon(
-                CupertinoIcons.heart_solid,
+              onPressed: toggleFavorite,
+              icon: Icon(
+                isFavorite ? CupertinoIcons.heart_solid : CupertinoIcons.heart,
                 color: Colors.black,
               )),
           IconButton(
@@ -225,11 +259,7 @@ class _RoutineDetailsState extends State<RoutineDetails> {
               width: 75,
               child: TextField(
                 decoration: const InputDecoration(
-                  //hintText: "Inserte su busqueda",
                   labelText: "Rating",
-                  //border: OutlineInputBorder(
-                  //    borderRadius: BorderRadius.all(Radius.circular(20.0))
-                  //)
                 ),
                 onChanged: (value) {
                   rating = int.parse(value);

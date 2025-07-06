@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:ezgym/screens/routine_details.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/routine.dart';
 import '../services/routineApi.dart';
@@ -18,6 +21,12 @@ class _FavouritesState extends State<Favourites> {
   @override
   void initState() {
     super.initState();
+    fetchRoutines();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     fetchRoutines();
   }
 
@@ -68,11 +77,19 @@ class _FavouritesState extends State<Favourites> {
   }
 
   Future<void> fetchRoutines() async {
-    final response = await RoutineApi.fetchRoutines();
-    if (!mounted) return; // 🔒 evita setState si el widget ya no existe
+    final prefs = await SharedPreferences.getInstance();
+    final favString = prefs.getString('favorites');
+    final Set<String> favIds =
+        favString != null ? Set<String>.from(jsonDecode(favString)) : {};
 
+    final response = await RoutineApi.fetchRoutines();
+
+    final List<Routine> favoritas =
+        response.where((r) => favIds.contains(r.sId)).toList();
+
+    if (!mounted) return;
     setState(() {
-      rutinas = response;
+      rutinas = favoritas;
     });
   }
 }
