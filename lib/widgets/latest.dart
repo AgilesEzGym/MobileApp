@@ -12,54 +12,67 @@ class Latest extends StatefulWidget {
 }
 
 class _LatestState extends State<Latest> {
-
   List<Routine> rutinas = [];
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     fetchRoutines();
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 175.0,
+        height: 190.0,
         margin: const EdgeInsets.symmetric(vertical: 20),
-        child: ListView.builder(scrollDirection: Axis.horizontal,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
           shrinkWrap: true,
           itemCount: rutinas.length,
-          itemBuilder: (context, index){
+          itemBuilder: (context, index) {
             final rutina = rutinas[index];
             return InkWell(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => RoutineDetails(rutina: rutina)));
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => RoutineDetails(rutina: rutina)));
               },
               child: Card(
-
                 child: Column(
                   children: [
-                    Image.network(rutina.image.toString(), width: 175, height: 110,),
+                    Image.network(
+                      rutina.image.toString(),
+                      width: 175,
+                      height: 110,
+                    ),
                     Text("${rutina.name}"),
                     Text("Duracion: ${rutina.lenght} min"),
                     Row(
                       children: [
                         Text("${rutina.score}"),
-                        Icon(Icons.star, color: Colors.amber,size: 15,),
+                        Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 15,
+                        ),
                       ],
                     )
                   ],
                 ),
               ),
             );
-          },)
-    );
+          },
+        ));
   }
 
-  Future<void> fetchRoutines() async{
+  Future<void> fetchRoutines() async {
     final response = await RoutineApi.fetchRoutines();
+
+    if (!mounted) return; // 👈 protege contra estado destruido
+
     setState(() {
-      rutinas = response;
-      rutinas = rutinas.reversed.toList();
+      rutinas = response.reversed.toList(); // más limpio también
     });
   }
 }
