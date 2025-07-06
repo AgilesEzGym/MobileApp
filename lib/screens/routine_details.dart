@@ -248,46 +248,49 @@ class _RoutineDetailsState extends State<RoutineDetails> {
   void showMessage() {
     int rating = 0;
     Routine data = widget.rutina;
+
     showDialog<String>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Rate'),
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              width: 75,
-              child: TextField(
-                decoration: const InputDecoration(
-                  labelText: "Rating",
-                ),
-                onChanged: (value) {
-                  rating = int.parse(value);
-                  print(rating);
-                },
-                keyboardType: TextInputType.number,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Califica la rutina'),
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  return IconButton(
+                    icon: Icon(
+                      index < rating ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 32,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        rating = index + 1;
+                      });
+                    },
+                  );
+                }),
               ),
-            ),
-            Icon(Icons.star, color: Colors.amber)
-          ],
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, 'Cancel');
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              data.score = rating;
-              updateRating(data);
-              Navigator.pop(context, 'OK');
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'Cancel'),
+                  child: const Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    data.score = rating;
+                    updateRating(data);
+                    Navigator.pop(context, 'OK');
+                  },
+                  child: const Text('Aceptar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
