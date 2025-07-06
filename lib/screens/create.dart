@@ -5,6 +5,7 @@ import 'package:ezgym/models/registerModel.dart';
 import 'package:ezgym/screens/home.dart';
 import 'package:ezgym/screens/login.dart';
 import 'package:ezgym/services/authApi.dart';
+import 'package:ezgym/widgets/nav.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -85,6 +86,10 @@ class _CreateState extends State<Create> {
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Campo obligatorio';
+                    }
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+com$');
+                    if (!emailRegex.hasMatch(value)) {
+                      return 'Correo no válido';
                     }
                     return null;
                   },
@@ -378,353 +383,6 @@ class _CreateState extends State<Create> {
           ),
         ),
       ];
-    Step(
-        title: const Text('Datos personales'),
-        isActive: _currentStep >= 0,
-        state: StepState.editing,
-        content: Form(
-        key: _keyForm,
-        child: Column(
-          children: [
-            TextFormField(
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Nombres',
-              ),
-              onChanged: (val){
-                nombre= val;
-              },
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            TextFormField(
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Apellidos',
-              ),
-              onChanged: (val){
-                apellido = val;
-              },
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            TextFormField(
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                }
-                final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+com$');
-                if (!emailRegex.hasMatch(value)) {
-                  return 'Correo no válido';
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Correo electrónico',
-              ),
-              onChanged: (val){
-                mail=val;
-              },
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            TextFormField(
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                }
-                return null;
-              },
-              obscureText: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Contraseña',
-              ),
-              onChanged: (val){
-                pwd = val;
-              },
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            TextFormField(
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                }
-                return null;
-              },
-              obscureText: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Confirmar contraseña',
-              ),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-          ],
-        ),
-      ),
-    ),
-    Step(
-        title: Text('Suscripción'),
-        isActive: _currentStep >= 1,
-        state: StepState.editing,
-        content: Center(
-          child: SizedBox(
-            height: 250,
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15.0)),
-                    child: InkWell(
-                      onTap: () { 
-                        setState(() {
-                          isChecked = true;
-                          _colorContainer1 = Colors.blue.withOpacity(0.3);
-                          _colorContainer2 = Colors.transparent;
-                          tipo = "Mensual";
-                        });
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width*1,
-                      height: 120,
-                      color: _colorContainer1,
-                      child: Row(
-                        children: [
-                          Container(
-                            width: MediaQuery.of(context).size.width*0.55,
-                            child: const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Plan Mensual',style: TextStyle(fontWeight: FontWeight.bold)),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text('Prueba gratuita de 1 semana para nuevos usuarios, '
-                                    'posterior al periodo de prueba el usuario '
-                                    'debera pagar lo correspondiente por una prueba mensual S/ 20')
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Container(
-                              child: const Text(
-                                'S/. 20',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15.0)),
-                    child: InkWell(
-                      onTap: () { 
-                        setState(() {
-                          isChecked = true;
-                          _colorContainer1 = Colors.transparent;
-                          _colorContainer2 = Colors.blue.withOpacity(0.3);
-                          tipo = "Anual";
-                        });
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width*1,
-                      height: 100,
-                      color: _colorContainer2,
-                      child: Row(
-                        children: [
-                          Container(
-                            width: MediaQuery.of(context).size.width*0.55,
-                            child: const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Plan Anual',style: TextStyle(fontWeight: FontWeight.bold)),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text('Ahorra dos meses de suscripcion disfruta la aplicacion por un anio entero '
-                                    'pagando por el precio de 10 meses')
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Container(
-                              child: const Text(
-                                'S/. 200',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  ),
-                ),
-              ],
-            ),
-          ))
-    ),
-    Step(
-        title: const Text('Pago'),
-        isActive: _currentStep >= 2,
-        state: StepState.complete,
-        content: Form(
-        key: _keyForm2,
-        child: Column(
-          children: [
-            TextFormField(
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                } else if (value.length != 16) {
-                  return 'La número tarjeta debe tener 16 dígitos';
-                }
-                return null;
-              },
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Número de tarjeta',
-              ),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            TextFormField(
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Nombre del titular',
-              ),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            TextFormField(
-              onTap:() {
-                FocusScope.of(context).requestFocus(new FocusNode());
-                setState(() {
-                  showCupertinoModalPopup(
-                    context: context,
-                    builder: (BuildContext context) => 
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.4,
-                      color: Colors.white,
-                      child: Column (
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              date.text = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-                            }, 
-                            child: const Text("Hecho"),
-                          ),
-                          Expanded(
-                            child: CupertinoDatePicker(
-                            backgroundColor: Colors.white,
-                            initialDateTime: dateTime,
-                            onDateTimeChanged: (DateTime newDateTime) {
-                              dateTime = newDateTime;
-                            },
-                            use24hFormat: true,
-                            mode: CupertinoDatePickerMode.date,
-                          ),
-                          )
-                        ],
-                        )         
-                      ),
-                    );
-                  }
-                );
-              },
-              controller: date,
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Fecha de vencimiento',
-              ),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            TextFormField(
-              autovalidateMode:
-              AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Campo obligatorio';
-                }
-                return null;
-              },
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Código CVV',
-              ),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-          ],
-        ),
-      ),
-    ),
-
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -762,8 +420,6 @@ class _CreateState extends State<Create> {
               });
             }
           } else {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Login()));
             //Navigator.push(context, MaterialPageRoute(builder: (context)=> Login()));
           }
         },
@@ -789,13 +445,13 @@ class _CreateState extends State<Create> {
     );
   }
 
-  void success() {
   void errorEmail() {
     showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: const Text('Correo en uso'),
-        content: const Text('El correo elegido ya está registrado en el sistema.'),
+        content:
+            const Text('El correo elegido ya está registrado en el sistema.'),
         actions: <Widget>[
           TextButton(
             onPressed: () {
@@ -807,7 +463,8 @@ class _CreateState extends State<Create> {
       ),
     );
   }
-  void success(){
+
+  void success() {
     showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -825,18 +482,23 @@ class _CreateState extends State<Create> {
     );
   }
 
-  Future<void> register() async{
-    dynamic creds = registerModel(name: nombre, surname: apellido, email: mail,photo: pic, password: pwd ,phone: "12345");
+  Future<void> register() async {
+    dynamic creds = registerModel(
+        name: nombre,
+        surname: apellido,
+        email: mail,
+        photo: pic,
+        password: pwd,
+        phone: "12345");
     dynamic response_cred = await authApi.register(creds);
     var decoded = jsonDecode(response_cred.body);
     print(decoded);
 
-    if(response_cred == 400 || response_cred.statusCode == 409){
+    if (response_cred == 400 || response_cred.statusCode == 409) {
       if (decoded['errors'].contains("Email already taken")) {
         errorEmail();
         return;
-      }
-      else{
+      } else {
         error();
         return;
       }
@@ -844,23 +506,26 @@ class _CreateState extends State<Create> {
 
     DateTime now = DateTime.now();
 
-    dynamic sub = Subscription(type: tipo, start: "${now.day}/${now.month}/${now.year}", end: "${now.add(Duration(days: 30)).day}/${now.add(Duration(days: 30)).month}/${now.add(Duration(days: 30)).year}", userId: decoded['id']);
+    dynamic sub = Subscription(
+        type: tipo,
+        start: "${now.day}/${now.month}/${now.year}",
+        end:
+            "${now.add(Duration(days: 30)).day}/${now.add(Duration(days: 30)).month}/${now.add(Duration(days: 30)).year}",
+        userId: decoded['id']);
 
     dynamic response_sub = await authApi.createSub(sub);
 
-    if(response_sub == 201){
+    if (response_sub == 201) {
       success();
       loggear(mail, pwd);
-    }
-    else{
+    } else {
       error();
       return;
     }
     //print(response);
   }
 
-
-  Future<void> loggear(String _email,String _password) async {
+  Future<void> loggear(String _email, String _password) async {
     var creds = loginModel(email: _email, password: _password);
     var json = creds.toJson();
     var storage = FlutterSecureStorage();
@@ -873,7 +538,8 @@ class _CreateState extends State<Create> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => Home(welcomeMessage: "¡Bienvenid@ a EzGym, $nombre!"),
+          builder: (context) =>
+              Nav(welcomeMessage: "¡Bienvenid@ a EzGym, $nombre!"),
         ),
       );
     }

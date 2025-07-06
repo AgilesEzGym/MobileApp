@@ -1,4 +1,3 @@
-
 import 'package:ezgym/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,7 +12,7 @@ void initAppLinks() {
     handleIncomingLink(uri);
   });
 
-  appLinks.getInitialLink().then((uri){
+  appLinks.getInitialLink().then((uri) {
     if (uri != null) handleIncomingLink(uri);
   });
 }
@@ -26,8 +25,10 @@ void handleIncomingLink(Uri uri) {
   }
 }
 
-void main() {
-  initAppLinks();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final uri = await appLinks.getInitialLink();
+  if (uri != null) handleIncomingLink(uri);
   runApp(const MyApp());
 }
 
@@ -39,11 +40,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => PushUpCounter(),
-      child: MaterialApp(
-          home: Login()
-      ),
+      child: MaterialApp(home: Login()),
     );
   }
 }
-
-

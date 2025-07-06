@@ -1,14 +1,13 @@
 import 'package:ezgym/screens/favorites.dart';
 import 'package:ezgym/screens/home.dart';
-import 'package:ezgym/screens/login.dart';
-import 'package:ezgym/screens/create.dart';
 import 'package:ezgym/screens/profileScreen.dart';
 import 'package:ezgym/screens/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Nav extends StatefulWidget {
-  const Nav({Key? key}) : super(key: key);
+  final String? welcomeMessage;
+  const Nav({Key? key, this.welcomeMessage}) : super(key: key);
 
   @override
   _NavState createState() => _NavState();
@@ -23,6 +22,16 @@ class _NavState extends State<Nav> {
   @override
   void initState() {
     super.initState();
+    if (widget.welcomeMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.welcomeMessage!),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      });
+    }
     setParams();
   }
 

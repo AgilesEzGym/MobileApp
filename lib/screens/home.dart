@@ -1,7 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
-//import 'package:ezgym/services/routineApi.dart';
-import 'package:ezgym/widgets/favs.dart';
 import 'package:ezgym/widgets/latest.dart';
 import 'package:flutter/material.dart';
 
@@ -9,9 +5,7 @@ import '../models/routine.dart';
 import '../widgets/recommended.dart';
 
 class Home extends StatefulWidget {
-  final String? welcomeMessage;
-
-  const Home({Key? key, this.welcomeMessage}) : super(key: key);
+  const Home({Key? key}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -23,16 +17,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    if (widget.welcomeMessage != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.welcomeMessage!),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      });
-    }
   }
 
   @override

@@ -27,6 +27,7 @@ class _SearchState extends State<Search> {
   Future<void> loadAllRoutines() async {
     try {
       final response = await RoutineApi.fetchRoutines();
+      if (!mounted) return;
       setState(() {
         allRoutines = response;
         rutinas = allRoutines;
@@ -34,9 +35,6 @@ class _SearchState extends State<Search> {
       });
     } catch (e) {
       print("Error al cargar rutinas: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error al cargar rutinas")),
-      );
     }
   }
 
@@ -131,36 +129,36 @@ class _SearchState extends State<Search> {
             // Lista de rutinas
             rutinas.isEmpty
                 ? const Padding(
-              padding: EdgeInsets.all(20),
-              child: Text("No hay resultados",
-                  style: TextStyle(fontSize: 16)),
-            )
+                    padding: EdgeInsets.all(20),
+                    child: Text("No hay resultados",
+                        style: TextStyle(fontSize: 16)),
+                  )
                 : ListView.builder(
-              itemCount: rutinas.length,
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                final rutina = rutinas[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(rutina.image ?? ''),
+                    itemCount: rutinas.length,
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final rutina = rutinas[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(rutina.image ?? ''),
+                        ),
+                        title: Text(rutina.name ?? ''),
+                        subtitle:
+                            Text("Dificultad: ${rutina.difficulty ?? 'N/A'}"),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  RoutineDetails(rutina: rutina),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                  title: Text(rutina.name ?? ''),
-                  subtitle:
-                  Text("Dificultad: ${rutina.difficulty ?? 'N/A'}"),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            RoutineDetails(rutina: rutina),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
           ],
         ),
       ),
