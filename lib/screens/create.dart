@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:ezgym/models/loginModel.dart';
 import 'package:ezgym/models/registerModel.dart';
 import 'package:ezgym/screens/home.dart';
 import 'package:ezgym/screens/login.dart';
 import 'package:ezgym/services/authApi.dart';
+import 'package:ezgym/widgets/nav.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/subscription.dart';
 
@@ -83,6 +86,10 @@ class _CreateState extends State<Create> {
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Campo obligatorio';
+                    }
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+com$');
+                    if (!emailRegex.hasMatch(value)) {
+                      return 'Correo no válido';
                     }
                     return null;
                   },
@@ -413,8 +420,7 @@ class _CreateState extends State<Create> {
               });
             }
           } else {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Login()));
+            //Navigator.push(context, MaterialPageRoute(builder: (context)=> Login()));
           }
         },
       ),
@@ -431,6 +437,25 @@ class _CreateState extends State<Create> {
           TextButton(
             onPressed: () {
               Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void errorEmail() {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Correo en uso'),
+        content:
+            const Text('El correo elegido ya está registrado en el sistema.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
             },
             child: const Text('OK'),
           ),
@@ -458,46 +483,65 @@ class _CreateState extends State<Create> {
   }
 
   Future<void> register() async {
-    final creds = registerModel(
+    dynamic creds = registerModel(
         name: nombre,
         surname: apellido,
         email: mail,
         photo: pic,
         password: pwd,
         phone: "12345");
+    dynamic response_cred = await authApi.register(creds);
+    var decoded = jsonDecode(response_cred.body);
+    print(decoded);
 
-    final res = await authApi.register(creds);
-
-    print("📡 STATUS: ${res.statusCode}");
-    print("📡 BODY: '${res.body}'");
-
-    if ((res.statusCode == 200 || res.statusCode == 201) &&
-        res.body.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(res.body);
-        print("✅ JSON decodificado: $decoded");
-
-        final sub = Subscription(
-          type: tipo,
-          start: '19/11/2023',
-          end: '19/11/2024',
-          userId: decoded['id'],
-        );
-
-        final response = await authApi.createSub(sub);
-
-        if (response == 201) {
-          success();
-        } else {
-          error();
-        }
-      } catch (e) {
-        print("❌ Error al decodificar JSON: $e");
+    if (response_cred == 400 || response_cred.statusCode == 409) {
+      if (decoded['errors'].contains("Email already taken")) {
+        errorEmail();
+        return;
+      } else {
         error();
+        return;
       }
+    }
+
+    DateTime now = DateTime.now();
+
+    dynamic sub = Subscription(
+        type: tipo,
+        start: "${now.day}/${now.month}/${now.year}",
+        end:
+            "${now.add(Duration(days: 30)).day}/${now.add(Duration(days: 30)).month}/${now.add(Duration(days: 30)).year}",
+        userId: decoded['id']);
+
+    dynamic response_sub = await authApi.createSub(sub);
+
+    if (response_sub == 201) {
+      success();
+      loggear(mail, pwd);
     } else {
-      print("❌ Error: status ${res.statusCode}, body vacío o inválido.");
       error();
+      return;
+    }
+    //print(response);
+  }
+
+  Future<void> loggear(String _email, String _password) async {
+    var creds = loginModel(email: _email, password: _password);
+    var json = creds.toJson();
+    var storage = FlutterSecureStorage();
+    var response = await authApi.login(json);
+    var decoded = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      print(decoded['id']);
+      await storage.write(key: 'id', value: decoded['id']);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              Nav(welcomeMessage: "¡Bienvenid@ a EzGym, $nombre!"),
+        ),
+      );
     }
   }
 }

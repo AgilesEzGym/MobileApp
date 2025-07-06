@@ -4,5 +4,4 @@ class ApiConfig {
   //static const String baseUrl = 'http://192.168.0.15:3000';
   // Producción
   static const String baseUrl = 'https://backend-ezgym.up.railway.app';
-
 }

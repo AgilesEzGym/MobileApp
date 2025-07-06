@@ -30,7 +30,7 @@ class _ProfileState extends State<Profile> {
   Future<void> fetch() async {
     final response = await UserApi.fetchProfile(id);
     final subs = await UserApi.getSub(id);
-
+    if (!mounted) return;
     setState(() {
       perfil = response;
       sub = subs;

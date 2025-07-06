@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:ezgym/screens/routine_details.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/routine.dart';
@@ -59,8 +61,30 @@ class _FavouritesState extends State<Favourites> {
                   ),
                   title: Text("${rutina.name}"),
                   subtitle: Text("${rutina.difficulty}"),
-                  trailing:
-                      const Icon(CupertinoIcons.heart_fill, color: Colors.red),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize
+                        .min, // Importante para que no use todo el ancho
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          // Acción del botón de compartir o el que quieras
+                          print("Eliminar favorito");
+                          removeFavorite(rutina.sId!);
+                        },
+                        icon: const Icon(CupertinoIcons.heart_fill,
+                            color: Colors.red),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          // Acción del botón de compartir o el que quieras
+                          //print("Compartir rutina");
+                          _showShareDialog(context, rutina);
+                        },
+                        icon: const Icon(CupertinoIcons.share,
+                            color: Colors.blue),
+                      ),
+                    ],
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -74,6 +98,66 @@ class _FavouritesState extends State<Favourites> {
             ),
           ],
         ));
+  }
+
+  Future<void> removeFavorite(String routineId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final favString = prefs.getString('favorites');
+    List<String> favIds =
+        favString != null ? List<String>.from(jsonDecode(favString)) : [];
+
+    setState(() {
+      favIds.remove(routineId);
+    });
+
+    await prefs.setString('favorites', jsonEncode(favIds));
+  }
+
+  void _showShareDialog(BuildContext context, Routine rutina) {
+    //final routineLink = "https://ezgym.app/routine/${rutina.sId}"; //  link
+    final routineLink = 'https://ezgym.app/routine/${rutina.sId}';
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text("Share this exercise with friends!"),
+              content: Column(mainAxisSize: MainAxisSize.min, children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "$routineLink",
+                        style: const TextStyle(color: Colors.blue),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.copy),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: routineLink));
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Link copied to clipboard!')),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                  child: const Text("Share this excercise!"),
+                  onPressed: () {
+                    SharePlus.instance.share(ShareParams(
+                        text: 'Check out this routine! 💪 $routineLink'));
+                  },
+                ),
+              ]),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Close"),
+                ),
+              ],
+            ));
   }
 
   Future<void> fetchRoutines() async {

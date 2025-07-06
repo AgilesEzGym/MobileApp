@@ -1,7 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
-//import 'package:ezgym/services/routineApi.dart';
-import 'package:ezgym/widgets/favs.dart';
 import 'package:ezgym/widgets/latest.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +13,11 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<Routine> rutinas = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
