@@ -646,7 +646,7 @@ class _CameraViewState extends State<CameraView> {
     _controller = CameraController(
       camera,
       // Set to ResolutionPreset.high. Do NOT set it to ResolutionPreset.max because for some phones does NOT work.
-      ResolutionPreset.medium,
+      ResolutionPreset.high,
       enableAudio: false,
       imageFormatGroup: Platform.isAndroid
           ? ImageFormatGroup.nv21
@@ -701,7 +701,7 @@ class _CameraViewState extends State<CameraView> {
     if (!_canProcess) return;
     _canProcess = false;
 
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 50), () {
       _canProcess = true;
     });
 
