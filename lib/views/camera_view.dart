@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:ezgym/models/exercise.dart';
+import 'package:ezgym/models/squat_counter.dart';
 import 'package:ezgym/models/workoutSessionModel.dart';
 import 'package:ezgym/screens/workout_history_screen.dart';
 import 'package:ezgym/util/n21_convertor.dart';
@@ -129,49 +130,100 @@ class _CameraViewState extends State<CameraView> {
           print('[DEBUG] Right elbow angle: ${rightAngle.toStringAsFixed(2)}');
           print('[DEBUG] Left elbow angle: ${leftAngle.toStringAsFixed(2)}');
 
-          final newState =
-              utils.isPushUp(rightAngle, leftAngle, bloc.state.state);
-          print('[DEBUG] New state from angle: $newState');
+          final name = widget.exercise?.name?.toLowerCase() ?? '';
+          if (name.contains('push up')) {
+            final pushBloc = BlocProvider.of<PushUpCounter>(context);
+            final newState =
+                utils.isPushUp(rightAngle, leftAngle, pushBloc.state.state);
 
-          if (newState != null) {
-            if (newState == PushUpState.init &&
-                bloc.state.state == PushUpState.neutral) {
-              bloc.setPushUpState(PushUpState.init);
-              print('[DEBUG] -> Estado INIT reconocido');
-            } else if (newState == PushUpState.complete &&
-                bloc.state.state == PushUpState.init) {
-              bloc.increment();
-              _audioPlayer.play(AssetSource('sounds/counter_up_complete.wav'));
-              bloc.setPushUpState(PushUpState.neutral); // volver a inicio
-              print('[DEBUG] -> Contador incrementado: ${bloc.state.counter}');
+            if (newState != null) {
+              if (newState == PushUpState.init &&
+                  pushBloc.state.state == PushUpState.neutral) {
+                pushBloc.setPushUpState(PushUpState.init);
+                print('[DEBUG] -> Estado INIT reconocido');
+              } else if (newState == PushUpState.complete &&
+                  pushBloc.state.state == PushUpState.init) {
+                pushBloc.increment();
+                _audioPlayer
+                    .play(AssetSource('sounds/counter_up_complete.wav'));
+                pushBloc.setPushUpState(PushUpState.neutral);
+                print(
+                    '[DEBUG] -> Contador incrementado: ${pushBloc.state.counter}');
 
-              final excersiceReps = widget.exercise?.reps ?? staticReps;
-              print('[DEBUG] -> REPS: ${excersiceReps}');
-              if (bloc.state.counter >= excersiceReps) {
-                guardarYMostrarDialogo(bloc.state.counter);
+                final exerciseReps = widget.exercise?.reps ?? staticReps;
+                print('[DEBUG] -> REPS: $exerciseReps');
+                if (pushBloc.state.counter >= exerciseReps) {
+                  guardarYMostrarDialogo(pushBloc.state.counter);
+                }
               }
             }
-          }
 
-          final utils.FeedbackResult result = utils.getPushUpFeedback(pose);
-          final List<String> feedback = result.messages;
-          if (feedback.isNotEmpty) {
-            final message = feedback.join('\n');
+            final utils.FeedbackResult result = utils.getPushUpFeedback(pose);
+            final List<String> feedback = result.messages;
+            if (feedback.isNotEmpty) {
+              final message = feedback.join('\n');
 
-            // Reinicia el timer
-            _feedbackTimer?.cancel();
-            _feedbackTimer = Timer(const Duration(seconds: 1), () {
-              if (mounted) {
+              _feedbackTimer?.cancel();
+              _feedbackTimer = Timer(const Duration(seconds: 1), () {
+                if (mounted) {
+                  setState(() {
+                    _feedbackMessage = null;
+                  });
+                }
+              });
+
+              if (_feedbackMessage != message) {
                 setState(() {
-                  _feedbackMessage = null;
+                  _feedbackMessage = message;
                 });
               }
-            });
+            }
+          } else if (name.contains('squat')) {
+            final squatBloc = BlocProvider.of<SquatCounter>(context);
+            final hip = pose.landmarks[PoseLandmarkType.rightHip];
+            final knee = pose.landmarks[PoseLandmarkType.rightKnee];
+            final ankle = pose.landmarks[PoseLandmarkType.rightAnkle];
 
-            if (_feedbackMessage != message) {
-              setState(() {
-                _feedbackMessage = message;
+            if (hip != null && knee != null && ankle != null) {
+              final squatAngle = utils.angle(hip, knee, ankle);
+              final newSquatState =
+                  utils.isSquat(squatAngle, squatBloc.state.state);
+              if (newSquatState == SquatState.init &&
+                  squatBloc.state.state == SquatState.neutral) {
+                squatBloc.setSquatState(SquatState.init);
+              } else if (newSquatState == SquatState.complete &&
+                  squatBloc.state.state == SquatState.init) {
+                squatBloc.increment();
+                _audioPlayer
+                    .play(AssetSource('sounds/counter_up_complete.wav'));
+                squatBloc.setSquatState(SquatState.neutral);
+
+                if (squatBloc.state.counter >=
+                    (widget.exercise?.reps ?? staticReps)) {
+                  guardarYMostrarDialogo(squatBloc.state.counter);
+                }
+              }
+            }
+
+            final utils.FeedbackResult result = utils.getSquatFeedback(pose);
+            final List<String> feedback = result.messages;
+            if (feedback.isNotEmpty) {
+              final message = feedback.join('\n');
+
+              _feedbackTimer?.cancel();
+              _feedbackTimer = Timer(const Duration(seconds: 1), () {
+                if (mounted) {
+                  setState(() {
+                    _feedbackMessage = null;
+                  });
+                }
               });
+
+              if (_feedbackMessage != message) {
+                setState(() {
+                  _feedbackMessage = message;
+                });
+              }
             }
           }
         } catch (e) {
@@ -319,38 +371,52 @@ class _CameraViewState extends State<CameraView> {
   }
 
   Widget _counterWidget() {
+    final name = widget.exercise?.name?.toLowerCase() ?? '';
+
+    if (name.contains('squat')) {
+      return BlocBuilder<SquatCounter, SquatStatus>(
+        builder: (context, state) {
+          return _buildCounterWidget(state.counter);
+        },
+      );
+    } else {
+      return BlocBuilder<PushUpCounter, PushUpStatus>(
+        builder: (context, state) {
+          return _buildCounterWidget(state.counter);
+        },
+      );
+    }
+  }
+
+  Widget _buildCounterWidget(int counter) {
     return Positioned(
       top: 50,
       left: 0,
       right: 0,
-      child: BlocBuilder<PushUpCounter, PushUpStatus>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              const Text(
-                'Counter',
-                style: TextStyle(color: Colors.white, fontSize: 14),
+      child: Column(
+        children: [
+          const Text(
+            'Counter',
+            style: TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(12),
+              border:
+                  Border.all(color: Colors.white.withOpacity(0.4), width: 4),
+            ),
+            child: Text(
+              '$counter',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
               ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: Colors.white.withOpacity(0.4), width: 4),
-                ),
-                child: Text(
-                  '${state.counter}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
-            ],
-          );
-        },
+            ),
+          )
+        ],
       ),
     );
   }

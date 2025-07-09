@@ -110,7 +110,7 @@ class _SearchState extends State<Search> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Duración máxima (segundos):"),
+                  const Text("Duración máxima (minutos):"),
                   Slider(
                     value: maxDuration.toDouble(),
                     min: 5,

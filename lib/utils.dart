@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:ezgym/models/squat_counter.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:path/path.dart';
@@ -77,70 +78,124 @@ FeedbackResult getPushUpFeedback(Pose pose) {
   List<String> feedback = [];
   List<List<PoseLandmarkType>> badLines = [];
 
+  // Landmarks necesarios
   final rs = pose.landmarks[PoseLandmarkType.rightShoulder];
   final re = pose.landmarks[PoseLandmarkType.rightElbow];
   final rw = pose.landmarks[PoseLandmarkType.rightWrist];
   final rh = pose.landmarks[PoseLandmarkType.rightHip];
+  final rk = pose.landmarks[PoseLandmarkType.rightKnee];
   final ra = pose.landmarks[PoseLandmarkType.rightAnkle];
 
   final ls = pose.landmarks[PoseLandmarkType.leftShoulder];
   final le = pose.landmarks[PoseLandmarkType.leftElbow];
   final lw = pose.landmarks[PoseLandmarkType.leftWrist];
   final lh = pose.landmarks[PoseLandmarkType.leftHip];
+  final lk = pose.landmarks[PoseLandmarkType.leftKnee];
   final la = pose.landmarks[PoseLandmarkType.leftAnkle];
 
-  if (rs == null ||
-      re == null ||
-      rw == null ||
-      ls == null ||
-      le == null ||
-      lw == null) {
+  if ([rs, re, rw, rh, rk, ra, ls, le, lw, lh, lk, la].any((p) => p == null)) {
     return FeedbackResult(messages: feedback, badLines: []);
   }
 
-  final rightElbowAngle = angle(rs, re, rw);
-  final leftElbowAngle = angle(ls, le, lw);
-  final diff = (rightElbowAngle - leftElbowAngle).abs();
+  // 1. Codos – profundidad y extensión
+  final rightElbowAngle = angle(rs!, re!, rw!);
+  final leftElbowAngle = angle(ls!, le!, lw!);
+  final avgElbow = (rightElbowAngle + leftElbowAngle) / 2;
 
-  // 1. Elbow angles feedback
-  if (rightElbowAngle > 165 && leftElbowAngle > 165) {
-    feedback.add("Baja más");
-    badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow]);
-    badLines.add([PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist]);
-    badLines.add([PoseLandmarkType.leftShoulder, PoseLandmarkType.leftElbow]);
-    badLines.add([PoseLandmarkType.leftElbow, PoseLandmarkType.leftWrist]);
-  } else if (rightElbowAngle < 50 && leftElbowAngle < 50) {
+  if (avgElbow > 160) {
+    feedback.add("Baja más los codos");
+    badLines.addAll([
+      [PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow],
+      [PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist],
+      [PoseLandmarkType.leftShoulder, PoseLandmarkType.leftElbow],
+      [PoseLandmarkType.leftElbow, PoseLandmarkType.leftWrist],
+    ]);
+  } else if (avgElbow < 45) {
     feedback.add("Extiende más los brazos");
-    badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow]);
-    badLines.add([PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist]);
-    badLines.add([PoseLandmarkType.leftShoulder, PoseLandmarkType.leftElbow]);
-    badLines.add([PoseLandmarkType.leftElbow, PoseLandmarkType.leftWrist]);
+    badLines.addAll([
+      [PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow],
+      [PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist],
+      [PoseLandmarkType.leftShoulder, PoseLandmarkType.leftElbow],
+      [PoseLandmarkType.leftElbow, PoseLandmarkType.leftWrist],
+    ]);
   }
 
-  // 2. Simetría
+  // 2. Simetría de brazos
+  final diff = (rightElbowAngle - leftElbowAngle).abs();
   if (diff > 20) {
-    feedback.add("Mantén ambos brazos simétricos");
+    feedback.add("Los brazos están desbalanceados");
     badLines.add([PoseLandmarkType.rightElbow, PoseLandmarkType.leftElbow]);
   }
 
-  // 3. Postura de cuerpo (evitar arco)
-  if (rs != null &&
-      rh != null &&
-      ra != null &&
-      ls != null &&
-      lh != null &&
-      la != null) {
-    final rightBodyAngle = angle(rs, rh, ra);
-    final leftBodyAngle = angle(ls, lh, la);
+  // 3. Alineación del torso y piernas (evitar arco)
+  final rightBodyAngle = angle(rs, rh!, ra!);
+  final leftBodyAngle = angle(ls, lh!, la!);
+  final avgBodyAngle = (rightBodyAngle + leftBodyAngle) / 2;
+  if (avgBodyAngle < 165) {
+    feedback.add("No arquees la espalda");
+    badLines.addAll([
+      [PoseLandmarkType.rightShoulder, PoseLandmarkType.rightHip],
+      [PoseLandmarkType.rightHip, PoseLandmarkType.rightAnkle],
+      [PoseLandmarkType.leftShoulder, PoseLandmarkType.leftHip],
+      [PoseLandmarkType.leftHip, PoseLandmarkType.leftAnkle],
+    ]);
+  }
 
-    final avgBodyAngle = (rightBodyAngle + leftBodyAngle) / 2;
-    if (avgBodyAngle < 165) {
-      feedback.add("Evita arquear la espalda");
-      badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightHip]);
-      badLines.add([PoseLandmarkType.rightHip, PoseLandmarkType.rightAnkle]);
-      badLines.add([PoseLandmarkType.leftShoulder, PoseLandmarkType.leftHip]);
-      badLines.add([PoseLandmarkType.leftHip, PoseLandmarkType.leftAnkle]);
-    }
+  // 4. Cadera caída
+  final hipMidY = (rh.y + lh.y) / 2;
+  final shoulderMidY = (rs.y + ls.y) / 2;
+  final kneeMidY = (rk!.y + lk!.y) / 2;
+  if (hipMidY > shoulderMidY + 20 && hipMidY > kneeMidY + 20) {
+    feedback.add("Levanta la cadera");
+    badLines.add([PoseLandmarkType.rightHip, PoseLandmarkType.leftHip]);
+  }
+
+  return FeedbackResult(messages: feedback, badLines: badLines);
+}
+
+SquatState? isSquat(double hipAngle, SquatState current) {
+  const thresholdDown = 90.0;
+  const thresholdUp = 160.0;
+
+  if (current == SquatState.neutral && hipAngle < thresholdDown) {
+    return SquatState.init; // <--- CAMBIO AQUÍ
+  }
+  if (current == SquatState.init && hipAngle > thresholdUp) {
+    return SquatState.complete;
+  }
+  return null;
+}
+
+FeedbackResult getSquatFeedback(Pose pose) {
+  List<String> feedback = [];
+  List<List<PoseLandmarkType>> badLines = [];
+
+  final lh = pose.landmarks[PoseLandmarkType.leftHip];
+  final lk = pose.landmarks[PoseLandmarkType.leftKnee];
+  final la = pose.landmarks[PoseLandmarkType.leftAnkle];
+  final rh = pose.landmarks[PoseLandmarkType.rightHip];
+  final rk = pose.landmarks[PoseLandmarkType.rightKnee];
+  final ra = pose.landmarks[PoseLandmarkType.rightAnkle];
+
+  if (lh == null ||
+      lk == null ||
+      la == null ||
+      rh == null ||
+      rk == null ||
+      ra == null) {
+    return FeedbackResult(messages: feedback, badLines: []);
+  }
+
+  final leftAngle = angle(lh, lk, la);
+  final rightAngle = angle(rh, rk, ra);
+  final avgAngle = (leftAngle + rightAngle) / 2;
+
+  if (avgAngle > 140) {
+    feedback.add("Baja más al hacer la sentadilla");
+    badLines.add([PoseLandmarkType.leftHip, PoseLandmarkType.leftKnee]);
+    badLines.add([PoseLandmarkType.leftKnee, PoseLandmarkType.leftAnkle]);
+    badLines.add([PoseLandmarkType.rightHip, PoseLandmarkType.rightKnee]);
+    badLines.add([PoseLandmarkType.rightKnee, PoseLandmarkType.rightAnkle]);
   }
 
   return FeedbackResult(messages: feedback, badLines: badLines);
