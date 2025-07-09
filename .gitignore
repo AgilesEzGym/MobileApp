@@ -29,3 +29,20 @@ doc/api/
 **/generated_plugin_registrant.*
 **/generated_plugins.cmake
 macos/Flutter/GeneratedPluginRegistrant.swift
+=======
+
+# FVM
+.fvm/
+.fvmrc
+
+# Configuración local de Android Studio
+.idea/
+
+# Android related
+android/.gradle/
+android/app/build/
+android/.idea/
+android/.kotlin/errors/
+*.iml
+.gradle/
+local.properties
