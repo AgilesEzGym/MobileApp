@@ -202,6 +202,8 @@ FeedbackResult getSquatFeedback(Pose pose) {
   return FeedbackResult(messages: feedback, badLines: badLines);
 }
 
+bool wasOpen = false;
+
 JumpingJackState? isJumpingJack({
   required Pose pose,
   required JumpingJackState currentState,
@@ -210,26 +212,29 @@ JumpingJackState? isJumpingJack({
   final rightAnkle = pose.landmarks[PoseLandmarkType.rightAnkle];
   final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
   final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  final nose = pose.landmarks[PoseLandmarkType.nose];
 
-  if (leftAnkle == null ||
-      rightAnkle == null ||
-      leftWrist == null ||
-      rightWrist == null) {
+  if ([leftAnkle, rightAnkle, leftWrist, rightWrist, nose]
+      .any((p) => p == null)) {
     return null;
   }
 
-  final ankleDistance = (leftAnkle.x - rightAnkle.x).abs();
-  final wristHeight = (leftWrist.y + rightWrist.y) / 2;
+  final ankleDistance = (leftAnkle!.x - rightAnkle!.x).abs();
+  final wristHeight = (leftWrist!.y + rightWrist!.y) / 2;
+  final noseY = nose!.y;
 
-  final isOpen = ankleDistance > 150 &&
-      wristHeight < pose.landmarks[PoseLandmarkType.nose]!.y;
+  const ankleOpenThreshold = 90.0;
+  const wristOpenThreshold = 60.0;
 
-  if (isOpen && currentState == JumpingJackState.neutral) {
+  final isOpen = ankleDistance > ankleOpenThreshold &&
+      wristHeight < noseY + wristOpenThreshold;
+
+  if (isOpen) {
+    wasOpen = true;
     return JumpingJackState.init;
-  }
-
-  if (!isOpen && currentState == JumpingJackState.init) {
-    return JumpingJackState.complete;
+  } else if (wasOpen) {
+    wasOpen = false;
+    return JumpingJackState.complete; // ← aquí cuentas 1 jumping jack
   }
 
   return null;
@@ -241,41 +246,69 @@ FeedbackResult getJumpingJackFeedback(Pose pose) {
 
   final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
   final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  final rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
   final leftAnkle = pose.landmarks[PoseLandmarkType.leftAnkle];
   final rightAnkle = pose.landmarks[PoseLandmarkType.rightAnkle];
   final nose = pose.landmarks[PoseLandmarkType.nose];
 
-  if (leftWrist != null &&
-      rightWrist != null &&
-      leftAnkle != null &&
-      rightAnkle != null &&
-      nose != null) {
-    final wristHeight = (leftWrist.y + rightWrist.y) / 2;
-    final ankleDistance = (leftAnkle.x - rightAnkle.x).abs();
+  // Validación básica
+  if ([
+    leftWrist,
+    rightWrist,
+    leftShoulder,
+    rightShoulder,
+    leftAnkle,
+    rightAnkle,
+    nose
+  ].any((p) => p == null)) {
+    return FeedbackResult(
+      messages: ['Cuerpo no detectado correctamente'],
+      badLines: [],
+    );
+  }
 
-    // -------- BADLINE 1: Brazos no están arriba
-    if (wristHeight > nose.y - 40) {
-      messages.add('Sube más los brazos');
-      badLines.add([
-        PoseLandmarkType.leftWrist,
-        PoseLandmarkType.leftShoulder,
-      ]);
-      badLines.add([
-        PoseLandmarkType.rightWrist,
-        PoseLandmarkType.rightShoulder,
-      ]);
-    }
+  // Coordenadas
+  final wristHeight = (leftWrist!.y + rightWrist!.y) / 2;
+  final shoulderHeight = (leftShoulder!.y + rightShoulder!.y) / 2;
+  final ankleDistance = (leftAnkle!.x - rightAnkle!.x).abs();
+  final shoulderWidth = (leftShoulder.x - rightShoulder.x).abs();
+  final wristDiff = (leftWrist.y - rightWrist.y).abs();
+  final noseY = nose!.y;
 
-    // -------- BADLINE 2: Piernas no suficientemente abiertas
-    if (ankleDistance < 120) {
-      messages.add('Abre más las piernas');
-      badLines.add([
-        PoseLandmarkType.leftAnkle,
-        PoseLandmarkType.rightAnkle,
-      ]);
-    }
-  } else {
-    messages.add('Cuerpo no detectado correctamente');
+  // --------- Feedback 1: Brazos bajos
+  final armLiftRatio = (shoulderHeight - wristHeight) /
+      (shoulderHeight - noseY + 1); // +1 evita división por 0
+  if (armLiftRatio < 0.3) {
+    messages.add('Intenta levantar más los brazos');
+    badLines.add([
+      PoseLandmarkType.leftWrist,
+      PoseLandmarkType.leftShoulder,
+    ]);
+    badLines.add([
+      PoseLandmarkType.rightWrist,
+      PoseLandmarkType.rightShoulder,
+    ]);
+  }
+
+  // --------- Feedback 2: Piernas poco abiertas
+  final ankleToShoulderRatio = ankleDistance / (shoulderWidth + 1);
+  if (ankleToShoulderRatio < 1.2) {
+    // 1.2 veces los hombros = abierto decente
+    messages.add('Abre un poco más las piernas');
+    badLines.add([
+      PoseLandmarkType.leftAnkle,
+      PoseLandmarkType.rightAnkle,
+    ]);
+  }
+
+  // --------- Feedback 3: Brazos desbalanceados
+  if (wristDiff > 40) {
+    messages.add('Levanta ambos brazos por igual');
+    badLines.add([
+      PoseLandmarkType.leftWrist,
+      PoseLandmarkType.rightWrist,
+    ]);
   }
 
   return FeedbackResult(messages: messages, badLines: badLines);

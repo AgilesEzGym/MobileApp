@@ -71,6 +71,16 @@ class _CameraViewState extends State<CameraView> {
   void initState() {
     super.initState();
     _startTime = DateTime.now();
+
+    final name = widget.exercise?.name?.toLowerCase() ?? '';
+    if (name.contains('push up')) {
+      context.read<PushUpCounter>().reset();
+    } else if (name.contains('squat')) {
+      context.read<SquatCounter>().reset();
+    } else if (name.contains('jumping jack')) {
+      context.read<JumpingJackCounter>().reset();
+    }
+
     _initialize();
   }
 
@@ -95,8 +105,6 @@ class _CameraViewState extends State<CameraView> {
     if (_sessionCompleted) return;
     if (widget.customPaint != oldWidget.customPaint) {
       print('[DEBUG] CustomPaint changed, checking poses');
-
-      final bloc = BlocProvider.of<PushUpCounter>(context);
 
       if (widget.posePainter == null || widget.posePainter!.poses.isEmpty) {
         print('[DEBUG] No poses found');
@@ -369,7 +377,7 @@ class _CameraViewState extends State<CameraView> {
                   ),
           ),
           _counterWidget(),
-          _backButton(),
+          _backButton(context),
           _switchLiveCameraToggle(),
           _detectionViewModeToggle(),
           _zoomControl(),
@@ -469,7 +477,7 @@ class _CameraViewState extends State<CameraView> {
     );
   }
 
-  Widget _backButton() => Positioned(
+  Widget _backButton(BuildContext context) => Positioned(
         top: 40,
         left: 8,
         child: SizedBox(
@@ -480,11 +488,11 @@ class _CameraViewState extends State<CameraView> {
             onPressed: () {
               final name = widget.exercise?.name?.toLowerCase() ?? '';
               if (name.contains('push up')) {
-                BlocProvider.of<PushUpCounter>(context).reset();
+                context.read<PushUpCounter>().reset();
               } else if (name.contains('squat')) {
-                BlocProvider.of<SquatCounter>(context).reset();
+                context.read<SquatCounter>().reset();
               } else if (name.contains('jumping jack')) {
-                BlocProvider.of<JumpingJackCounter>(context).reset();
+                context.read<JumpingJackCounter>().reset();
               }
               Navigator.of(context).pop();
             },
