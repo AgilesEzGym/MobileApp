@@ -1,3 +1,4 @@
+import 'package:ezgym/models/jumping_jack_counter.dart';
 import 'package:ezgym/models/squat_counter.dart';
 import 'package:ezgym/screens/login.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<SquatCounter>(
           create: (_) => SquatCounter(),
         ),
+        BlocProvider<JumpingJackCounter>(create: (_) => JumpingJackCounter()),
       ],
       child: MaterialApp(home: Login()),
     );

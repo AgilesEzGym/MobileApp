@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:ezgym/models/exercise.dart';
+import 'package:ezgym/models/jumping_jack_counter.dart';
 import 'package:ezgym/models/squat_counter.dart';
 import 'package:ezgym/models/workoutSessionModel.dart';
 import 'package:ezgym/screens/workout_history_screen.dart';
@@ -225,6 +226,47 @@ class _CameraViewState extends State<CameraView> {
                 });
               }
             }
+          } else if (name.contains('jumping jack')) {
+            final jumpingJackBloc =
+                BlocProvider.of<JumpingJackCounter>(context);
+            final newState = utils.isJumpingJack(
+              pose: pose,
+              currentState: jumpingJackBloc.state.state,
+            );
+
+            if (newState == JumpingJackState.init &&
+                jumpingJackBloc.state.state == JumpingJackState.neutral) {
+              jumpingJackBloc.setJumpingJackState(JumpingJackState.init);
+            } else if (newState == JumpingJackState.complete &&
+                jumpingJackBloc.state.state == JumpingJackState.init) {
+              jumpingJackBloc.increment();
+              _audioPlayer.play(AssetSource('sounds/counter_up_complete.wav'));
+              jumpingJackBloc.setJumpingJackState(JumpingJackState.neutral);
+
+              if (jumpingJackBloc.state.counter >=
+                  (widget.exercise?.reps ?? staticReps)) {
+                guardarYMostrarDialogo(jumpingJackBloc.state.counter);
+              }
+            }
+
+            final feedback = utils.getJumpingJackFeedback(pose).messages;
+            if (feedback.isNotEmpty) {
+              final message = feedback.join('\n');
+              _feedbackTimer?.cancel();
+              _feedbackTimer = Timer(const Duration(seconds: 1), () {
+                if (mounted) {
+                  setState(() {
+                    _feedbackMessage = null;
+                  });
+                }
+              });
+
+              if (_feedbackMessage != message) {
+                setState(() {
+                  _feedbackMessage = message;
+                });
+              }
+            }
           }
         } catch (e) {
           print('[ERROR] Failed to process pose: $e');
@@ -379,6 +421,12 @@ class _CameraViewState extends State<CameraView> {
           return _buildCounterWidget(state.counter);
         },
       );
+    } else if (name.contains('jumping jack')) {
+      return BlocBuilder<JumpingJackCounter, JumpingJackStatus>(
+        builder: (context, state) {
+          return _buildCounterWidget(state.counter);
+        },
+      );
     } else {
       return BlocBuilder<PushUpCounter, PushUpStatus>(
         builder: (context, state) {
@@ -430,7 +478,14 @@ class _CameraViewState extends State<CameraView> {
           child: FloatingActionButton(
             heroTag: Object(),
             onPressed: () {
-              BlocProvider.of<PushUpCounter>(context).reset();
+              final name = widget.exercise?.name?.toLowerCase() ?? '';
+              if (name.contains('push up')) {
+                BlocProvider.of<PushUpCounter>(context).reset();
+              } else if (name.contains('squat')) {
+                BlocProvider.of<SquatCounter>(context).reset();
+              } else if (name.contains('jumping jack')) {
+                BlocProvider.of<JumpingJackCounter>(context).reset();
+              }
               Navigator.of(context).pop();
             },
             backgroundColor: Colors.black54,

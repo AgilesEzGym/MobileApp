@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:ezgym/models/jumping_jack_counter.dart';
 import 'package:ezgym/models/squat_counter.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
@@ -199,4 +200,83 @@ FeedbackResult getSquatFeedback(Pose pose) {
   }
 
   return FeedbackResult(messages: feedback, badLines: badLines);
+}
+
+JumpingJackState? isJumpingJack({
+  required Pose pose,
+  required JumpingJackState currentState,
+}) {
+  final leftAnkle = pose.landmarks[PoseLandmarkType.leftAnkle];
+  final rightAnkle = pose.landmarks[PoseLandmarkType.rightAnkle];
+  final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+
+  if (leftAnkle == null ||
+      rightAnkle == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return null;
+  }
+
+  final ankleDistance = (leftAnkle.x - rightAnkle.x).abs();
+  final wristHeight = (leftWrist.y + rightWrist.y) / 2;
+
+  final isOpen = ankleDistance > 150 &&
+      wristHeight < pose.landmarks[PoseLandmarkType.nose]!.y;
+
+  if (isOpen && currentState == JumpingJackState.neutral) {
+    return JumpingJackState.init;
+  }
+
+  if (!isOpen && currentState == JumpingJackState.init) {
+    return JumpingJackState.complete;
+  }
+
+  return null;
+}
+
+FeedbackResult getJumpingJackFeedback(Pose pose) {
+  final List<String> messages = [];
+  final List<List<PoseLandmarkType>> badLines = [];
+
+  final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  final rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  final leftAnkle = pose.landmarks[PoseLandmarkType.leftAnkle];
+  final rightAnkle = pose.landmarks[PoseLandmarkType.rightAnkle];
+  final nose = pose.landmarks[PoseLandmarkType.nose];
+
+  if (leftWrist != null &&
+      rightWrist != null &&
+      leftAnkle != null &&
+      rightAnkle != null &&
+      nose != null) {
+    final wristHeight = (leftWrist.y + rightWrist.y) / 2;
+    final ankleDistance = (leftAnkle.x - rightAnkle.x).abs();
+
+    // -------- BADLINE 1: Brazos no están arriba
+    if (wristHeight > nose.y - 40) {
+      messages.add('Sube más los brazos');
+      badLines.add([
+        PoseLandmarkType.leftWrist,
+        PoseLandmarkType.leftShoulder,
+      ]);
+      badLines.add([
+        PoseLandmarkType.rightWrist,
+        PoseLandmarkType.rightShoulder,
+      ]);
+    }
+
+    // -------- BADLINE 2: Piernas no suficientemente abiertas
+    if (ankleDistance < 120) {
+      messages.add('Abre más las piernas');
+      badLines.add([
+        PoseLandmarkType.leftAnkle,
+        PoseLandmarkType.rightAnkle,
+      ]);
+    }
+  } else {
+    messages.add('Cuerpo no detectado correctamente');
+  }
+
+  return FeedbackResult(messages: messages, badLines: badLines);
 }
