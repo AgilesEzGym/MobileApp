@@ -91,7 +91,8 @@ class _LoginState extends State<Login> {
                       textColor: Colors.white,
                       child: Text("Iniciar sesión"),
                       onPressed: () {
-                        loggear();
+                        navigate();
+                        //loggear();
                       },
                       splashColor: Colors.white,
                     ),
