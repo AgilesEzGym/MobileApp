@@ -60,3 +60,48 @@ PushUpState? isPushUp(double angleElbow, PushUpState current) {
 
   return null;
 }
+
+class FeedbackResult {
+  final List<String> messages;
+  final List<List<PoseLandmarkType>> badLines;
+
+  FeedbackResult({required this.messages, required this.badLines});
+}
+
+FeedbackResult getPushUpFeedback(Pose pose) {
+  List<String> feedback = [];
+  List<List<PoseLandmarkType>> badLines = [];
+
+  final rs = pose.landmarks[PoseLandmarkType.rightShoulder];
+  final re = pose.landmarks[PoseLandmarkType.rightElbow];
+  final rw = pose.landmarks[PoseLandmarkType.rightWrist];
+  final rh = pose.landmarks[PoseLandmarkType.rightHip];
+  final rk = pose.landmarks[PoseLandmarkType.rightKnee];
+  final ra = pose.landmarks[PoseLandmarkType.rightAnkle];
+
+  if (rs == null || re == null || rw == null) {
+    return FeedbackResult(messages: feedback, badLines: []);
+  }
+
+  final elbowAngle = angle(rs, re, rw);
+  if (elbowAngle > 165) {
+    feedback.add("Baja más");
+    badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow]);
+    badLines.add([PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist]);
+  } else if (elbowAngle < 50) {
+    feedback.add("Extiende más los brazos");
+    badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow]);
+    badLines.add([PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist]);
+  }
+
+  if (rs != null && rh != null && ra != null) {
+    final bodyAngle = angle(rs, rh, ra);
+    if (bodyAngle < 165) {
+      feedback.add("Evita arquear la espalda");
+      badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightHip]);
+      badLines.add([PoseLandmarkType.rightHip, PoseLandmarkType.rightAnkle]);
+    }
+  }
+
+  return FeedbackResult(messages: feedback, badLines: badLines);
+}

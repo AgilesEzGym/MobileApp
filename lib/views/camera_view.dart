@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -41,6 +42,9 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
+  String? _feedbackMessage;
+  Timer? _feedbackTimer;
+
   DateTime? _startTime;
   final int staticReps = 2;
   bool _sessionCompleted = false;
@@ -133,6 +137,28 @@ class _CameraViewState extends State<CameraView> {
               if (bloc.state.counter >= excersiceReps) {
                 guardarYMostrarDialogo(bloc.state.counter);
               }
+            }
+          }
+
+          final utils.FeedbackResult result = utils.getPushUpFeedback(pose);
+          final List<String> feedback = result.messages;
+          if (feedback.isNotEmpty) {
+            final message = feedback.join('\n');
+
+            // Reinicia el timer
+            _feedbackTimer?.cancel();
+            _feedbackTimer = Timer(const Duration(seconds: 1), () {
+              if (mounted) {
+                setState(() {
+                  _feedbackMessage = null;
+                });
+              }
+            });
+
+            if (_feedbackMessage != message) {
+              setState(() {
+                _feedbackMessage = message;
+              });
             }
           }
         } catch (e) {
@@ -241,6 +267,39 @@ class _CameraViewState extends State<CameraView> {
           _detectionViewModeToggle(),
           _zoomControl(),
           _exposureControl(),
+          if (_feedbackMessage != null)
+            Positioned(
+              bottom: 120,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.warning_amber_rounded,
+                          color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text(
+                        _feedbackMessage!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:ezgym/models/exercise.dart';
 import 'package:ezgym/models/push_up_model.dart';
+import 'package:ezgym/utils.dart' as utils;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,12 +64,20 @@ class _PoseDetectorViewState extends State<PoseDetectorView> {
     final poses = await _poseDetector.processImage(inputImage);
     if (inputImage.metadata?.size != null &&
         inputImage.metadata?.rotation != null) {
+      List<List<PoseLandmarkType>> allBadLines = [];
+      for (final pose in poses) {
+        final result = utils.getPushUpFeedback(pose);
+        allBadLines.addAll(result.badLines);
+      }
+
       final painter = PosePainter(
         poses,
         inputImage.metadata!.size,
         inputImage.metadata!.rotation,
         _cameraLensDirection,
+        allBadLines,
       );
+
       _customPaint = CustomPaint(painter: painter);
       _posePainter = painter;
     } else {
