@@ -96,18 +96,6 @@ class _LoginState extends State<Login> {
                       splashColor: Colors.white,
                     ),
                     Padding(padding: EdgeInsets.only(top: 20.0)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        MaterialButton(
-                          onPressed: () {},
-                          child: Text(
-                            '¿Olvidaste tu contraseña?',
-                            style: TextStyle(fontFamily: 'FredokaOne'),
-                          ),
-                        )
-                      ],
-                    ),
                     Padding(padding: EdgeInsets.only(top: 80.0)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

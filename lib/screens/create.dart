@@ -27,6 +27,8 @@ class _CreateState extends State<Create> {
   Color _colorContainer2 = Colors.transparent;
   DateTime dateTime = DateTime.now();
   TextEditingController date = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
 
   String nombre = "";
   String apellido = "";
@@ -105,10 +107,17 @@ class _CreateState extends State<Create> {
                   height: 8,
                 ),
                 TextFormField(
+                  controller: passwordController,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
-                    if (value!.isEmpty) {
+                    if (value == null || value.isEmpty) {
                       return 'Campo obligatorio';
+                    }
+                    if (value.length < 8) return 'Mínimo 8 caracteres';
+                    final passwordRegex =
+                        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#*]).{8,}$');
+                    if (!passwordRegex.hasMatch(value)) {
+                      return 'Debe incluir minúscula, mayúscula y símbolo (@#*)';
                     }
                     return null;
                   },
@@ -125,10 +134,14 @@ class _CreateState extends State<Create> {
                   height: 8,
                 ),
                 TextFormField(
+                  controller: confirmPasswordController,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
-                    if (value!.isEmpty) {
+                    if (value == null || value.isEmpty) {
                       return 'Campo obligatorio';
+                    }
+                    if (value != passwordController.text) {
+                      return 'Las contraseñas no coinciden';
                     }
                     return null;
                   },
@@ -151,7 +164,7 @@ class _CreateState extends State<Create> {
             state: StepState.editing,
             content: Center(
                 child: SizedBox(
-              height: 250,
+              height: 300,
               child: ListView(
                 children: [
                   Padding(
@@ -170,7 +183,7 @@ class _CreateState extends State<Create> {
                         },
                         child: Container(
                           width: MediaQuery.of(context).size.width * 1,
-                          height: 120,
+                          height: 130,
                           color: _colorContainer1,
                           child: Row(
                             children: [
@@ -225,7 +238,7 @@ class _CreateState extends State<Create> {
                         },
                         child: Container(
                           width: MediaQuery.of(context).size.width * 1,
-                          height: 100,
+                          height: 120,
                           color: _colorContainer2,
                           child: Row(
                             children: [
@@ -364,8 +377,11 @@ class _CreateState extends State<Create> {
                 TextFormField(
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
-                    if (value!.isEmpty) {
+                    if (value == null || value.isEmpty) {
                       return 'Campo obligatorio';
+                    }
+                    if (!RegExp(r'^\d{3}$').hasMatch(value)) {
+                      return 'Debe tener exactamente 3 dígitos';
                     }
                     return null;
                   },
