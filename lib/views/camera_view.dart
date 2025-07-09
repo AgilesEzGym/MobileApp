@@ -105,19 +105,32 @@ class _CameraViewState extends State<CameraView> {
         print('[DEBUG] Processing pose...');
 
         try {
-          final p1 = pose.landmarks[PoseLandmarkType.rightShoulder];
-          final p2 = pose.landmarks[PoseLandmarkType.rightElbow];
-          final p3 = pose.landmarks[PoseLandmarkType.rightWrist];
+          final rs = pose.landmarks[PoseLandmarkType.rightShoulder];
+          final re = pose.landmarks[PoseLandmarkType.rightElbow];
+          final rw = pose.landmarks[PoseLandmarkType.rightWrist];
 
-          if (p1 == null || p2 == null || p3 == null) {
+          final ls = pose.landmarks[PoseLandmarkType.leftShoulder];
+          final le = pose.landmarks[PoseLandmarkType.leftElbow];
+          final lw = pose.landmarks[PoseLandmarkType.leftWrist];
+
+          if (rs == null ||
+              re == null ||
+              rw == null ||
+              ls == null ||
+              le == null ||
+              lw == null) {
             print('[DEBUG] Missing landmarks');
-            continue;
+            return;
           }
 
-          final angle = utils.angle(p1, p2, p3);
-          print('[DEBUG] Elbow angle: ${angle.toStringAsFixed(2)}');
+          final rightAngle = utils.angle(rs, re, rw);
+          final leftAngle = utils.angle(ls, le, lw);
 
-          final newState = utils.isPushUp(angle, bloc.state.state);
+          print('[DEBUG] Right elbow angle: ${rightAngle.toStringAsFixed(2)}');
+          print('[DEBUG] Left elbow angle: ${leftAngle.toStringAsFixed(2)}');
+
+          final newState =
+              utils.isPushUp(rightAngle, leftAngle, bloc.state.state);
           print('[DEBUG] New state from angle: $newState');
 
           if (newState != null) {

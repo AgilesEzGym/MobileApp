@@ -42,19 +42,24 @@ double angle(
   return degrees;
 }
 
-PushUpState? isPushUp(double angleElbow, PushUpState current) {
-  const thresholdDown = 75.0; // codo muy doblado (abajo)
-  const thresholdUp = 160.0; // codo extendido (arriba)
+PushUpState? isPushUp(
+  double rightElbowAngle,
+  double leftElbowAngle,
+  PushUpState current,
+) {
+  const thresholdDown = 100.0; // codo muy doblado (posición abajo)
+  const thresholdUp = 150.0; // codo extendido (posición arriba)
 
-  print('[DEBUG isPushUp] Angle: $angleElbow | Current: $current');
+  final avgElbow = (rightElbowAngle + leftElbowAngle) / 2;
 
-  if (current == PushUpState.neutral && angleElbow < thresholdDown) {
-    print('[DEBUG isPushUp] -> init');
+  print(
+      '[DEBUG isPushUp] Right: $rightElbowAngle | Left: $leftElbowAngle | Avg: $avgElbow | State: $current');
+
+  if (current == PushUpState.neutral && avgElbow < thresholdDown) {
     return PushUpState.init;
   }
 
-  if (current == PushUpState.init && angleElbow > thresholdUp) {
-    print('[DEBUG isPushUp] -> complete');
+  if (current == PushUpState.init && avgElbow > thresholdUp) {
     return PushUpState.complete;
   }
 
@@ -76,30 +81,65 @@ FeedbackResult getPushUpFeedback(Pose pose) {
   final re = pose.landmarks[PoseLandmarkType.rightElbow];
   final rw = pose.landmarks[PoseLandmarkType.rightWrist];
   final rh = pose.landmarks[PoseLandmarkType.rightHip];
-  final rk = pose.landmarks[PoseLandmarkType.rightKnee];
   final ra = pose.landmarks[PoseLandmarkType.rightAnkle];
 
-  if (rs == null || re == null || rw == null) {
+  final ls = pose.landmarks[PoseLandmarkType.leftShoulder];
+  final le = pose.landmarks[PoseLandmarkType.leftElbow];
+  final lw = pose.landmarks[PoseLandmarkType.leftWrist];
+  final lh = pose.landmarks[PoseLandmarkType.leftHip];
+  final la = pose.landmarks[PoseLandmarkType.leftAnkle];
+
+  if (rs == null ||
+      re == null ||
+      rw == null ||
+      ls == null ||
+      le == null ||
+      lw == null) {
     return FeedbackResult(messages: feedback, badLines: []);
   }
 
-  final elbowAngle = angle(rs, re, rw);
-  if (elbowAngle > 165) {
+  final rightElbowAngle = angle(rs, re, rw);
+  final leftElbowAngle = angle(ls, le, lw);
+  final diff = (rightElbowAngle - leftElbowAngle).abs();
+
+  // 1. Elbow angles feedback
+  if (rightElbowAngle > 165 && leftElbowAngle > 165) {
     feedback.add("Baja más");
     badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow]);
     badLines.add([PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist]);
-  } else if (elbowAngle < 50) {
+    badLines.add([PoseLandmarkType.leftShoulder, PoseLandmarkType.leftElbow]);
+    badLines.add([PoseLandmarkType.leftElbow, PoseLandmarkType.leftWrist]);
+  } else if (rightElbowAngle < 50 && leftElbowAngle < 50) {
     feedback.add("Extiende más los brazos");
     badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow]);
     badLines.add([PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist]);
+    badLines.add([PoseLandmarkType.leftShoulder, PoseLandmarkType.leftElbow]);
+    badLines.add([PoseLandmarkType.leftElbow, PoseLandmarkType.leftWrist]);
   }
 
-  if (rs != null && rh != null && ra != null) {
-    final bodyAngle = angle(rs, rh, ra);
-    if (bodyAngle < 165) {
+  // 2. Simetría
+  if (diff > 20) {
+    feedback.add("Mantén ambos brazos simétricos");
+    badLines.add([PoseLandmarkType.rightElbow, PoseLandmarkType.leftElbow]);
+  }
+
+  // 3. Postura de cuerpo (evitar arco)
+  if (rs != null &&
+      rh != null &&
+      ra != null &&
+      ls != null &&
+      lh != null &&
+      la != null) {
+    final rightBodyAngle = angle(rs, rh, ra);
+    final leftBodyAngle = angle(ls, lh, la);
+
+    final avgBodyAngle = (rightBodyAngle + leftBodyAngle) / 2;
+    if (avgBodyAngle < 165) {
       feedback.add("Evita arquear la espalda");
       badLines.add([PoseLandmarkType.rightShoulder, PoseLandmarkType.rightHip]);
       badLines.add([PoseLandmarkType.rightHip, PoseLandmarkType.rightAnkle]);
+      badLines.add([PoseLandmarkType.leftShoulder, PoseLandmarkType.leftHip]);
+      badLines.add([PoseLandmarkType.leftHip, PoseLandmarkType.leftAnkle]);
     }
   }
 
