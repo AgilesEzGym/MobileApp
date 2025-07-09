@@ -5,6 +5,7 @@ import 'package:ezgym/services/userApi.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/profile.dart';
 import 'edit_profile_screen.dart'; // asegúrate de tener esta pantalla creada
+import 'support.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key, required this.id}) : super(key: key);
@@ -76,128 +77,82 @@ class _ProfileState extends State<Profile> {
           ),
         ],
       ),
-      body: Container(
-        height: 610.0,
-        padding: EdgeInsets.all(20.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 10),
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                border: Border.all(width: 3, color: Colors.white),
-                boxShadow: const [
-                  BoxShadow(spreadRadius: 2, color: Colors.grey),
-                ],
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: NetworkImage(perfil.photo.toString()),
+            const SizedBox(height: 10),
+            Center(
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  border: Border.all(width: 3, color: Colors.white),
+                  boxShadow: const [BoxShadow(spreadRadius: 2, color: Colors.grey)],
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: NetworkImage(perfil.photo.toString()),
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 30),
+            const Text('INFORMACIÓN PERSONAL',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
             Row(
-              children: const [
-                Text('INFORMACIÓN PERSONAL',
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Nombre:',
+                          style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      Text("${perfil.name}", style: const TextStyle(fontSize: 14)),
+                      const SizedBox(height: 10),
+                      const Text("Correo electrónico:",
+                          style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      Text("${perfil.email}", style: const TextStyle(fontSize: 14)),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Apellido:',
+                          style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      Text("${perfil.surname}", style: const TextStyle(fontSize: 14)),
+                      const SizedBox(height: 10),
+                      const Text('Número telefónico:',
+                          style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      Text("${perfil.phone}", style: const TextStyle(fontSize: 14)),
+                    ],
+                  ),
+                ),
               ],
             ),
-            Expanded(
-              child: Row(
+            const SizedBox(height: 20),
+            const Text('SUSCRIPCIÓN',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            if (sub.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 10),
-                        const Text('Nombre:',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 5),
-                        Text("${perfil.name}",
-                            style: const TextStyle(fontSize: 14)),
-                        const SizedBox(height: 10),
-                        const Text("Correo electrónico:",
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 5),
-                        Text("${perfil.email}",
-                            style: const TextStyle(fontSize: 14)),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 10),
-                        const Text('Apellido:',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 5),
-                        Text("${perfil.surname}",
-                            style: const TextStyle(fontSize: 14)),
-                        const SizedBox(height: 10),
-                        const Text('Número telefónico:',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 5),
-                        Text("${perfil.phone}",
-                            style: const TextStyle(fontSize: 14)),
-                      ],
-                    ),
-                  ),
+                  Text("Tipo: ${sub[0].type}", style: TextStyle(fontSize: 16)),
+                  Text("Inicio: ${sub[0].start}", style: TextStyle(fontSize: 16)),
+                  Text("Fin: ${sub[0].end}", style: TextStyle(fontSize: 16)),
                 ],
               ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: const [
-                Text('SUSCRIPCIÓN',
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Text('Tipo: ',
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                if (sub.isNotEmpty)
-                  Text("${sub[0].type}", style: TextStyle(fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 5),
-            Row(
-              children: [
-                const Text('Inicio: ',
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                if (sub.isNotEmpty)
-                  Text("${sub[0].start}", style: TextStyle(fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 5),
-            Row(
-              children: [
-                const Text('Fin: ',
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                if (sub.isNotEmpty)
-                  Text("${sub[0].end}", style: TextStyle(fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: const [
-                Text('MÉTODO DE PAGO',
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-              ],
-            ),
+            const SizedBox(height: 20),
+            const Text('MÉTODO DE PAGO',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             Container(
               height: 40,
@@ -226,6 +181,27 @@ class _ProfileState extends State<Profile> {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  final correo = perfil.email;
+                  if (correo != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SupportScreen(userEmail: correo)),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('No se encontró el correo del usuario')),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.support_agent),
+                label: const Text("Soporte Técnico"),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
